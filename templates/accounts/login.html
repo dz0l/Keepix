@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Вход — Keepix{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Вход</h1>
+  <form method="post" class="stack">{% csrf_token %}
+    {{ form.non_field_errors }}
+    <label>{{ form.username.label }}{{ form.username }}</label>
+    <label>{{ form.password.label }}{{ form.password }}</label>
+    <button type="submit" class="primary">Войти</button>
+  </form>
+</section>
+{% endblock %}

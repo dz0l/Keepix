@@ -1,0 +1,65 @@
+:root {
+  font-family: system-ui, Segoe UI, Roboto, sans-serif;
+  --bg: #f4f5f7;
+  --card: #fff;
+  --text: #1a1f24;
+  --accent: #1e6fad;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.theme-light .topbar {
+  background: var(--card);
+  border-bottom: 1px solid #ddd;
+  padding: 0.75rem 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.brand {
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--accent);
+}
+
+.container {
+  padding: 1.25rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.card {
+  background: var(--card);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgb(30 58 138 / 0.06);
+}
+
+.card.narrow { max-width: 420px; }
+
+.stack label { display: block; margin-bottom: 0.75rem; }
+.stack input { width: 100%; padding: 0.45rem 0.5rem; }
+
+.primary {
+  padding: 0.55rem 1.2rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.linkish {
+  border: none;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.messages { padding-left: 1.25rem; color: #a31; }

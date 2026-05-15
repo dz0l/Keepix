@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  compose-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate compose + env
+        run: |
+          set -euo pipefail
+          cat > .env <<'EOF'
+          SECRET_KEY=ci-placeholder-not-for-production
+          DEBUG=0
+          FORCE_HTTPS=0
+          USE_X_ACCEL=1
+          ALLOWED_HOSTS=localhost,127.0.0.1
+          DB_NAME=keepix_db
+          DB_USER=keepix_user
+          DB_PASSWORD=ci_db_password
+          APP_PORT=8080
+          EOF
+          docker compose --env-file .env config -q

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Keepix{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Добро пожаловать</h1>
+  <p>Сервер Keepix запущен. Каталог объектов и медиавложения будут добавлены на следующих этапах.</p>
+  <p>Ваш доступ: {% if user.is_catalog_admin %}администратор{% else %}пользователь{% endif %}.</p>
+</section>
+{% endblock %}

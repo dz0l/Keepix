@@ -1,0 +1,21 @@
+.git
+_git
+.cursor
+**/node_modules/
+**/__pycache__/
+**/*.pyc
+**/.venv
+media/
+staticfiles/
+backups/
+.env
+_ref/
+
+# Operator image: no developer-only docs, CI, or installers
+docs/
+.github/
+CONTINUITY.md
+install.sh
+scripts/
+README.md
+*.local.md
