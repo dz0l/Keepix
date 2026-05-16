@@ -52,6 +52,8 @@ class CatalogObjectForm(forms.ModelForm):
         self.existing_photo_count = kwargs.pop('existing_photo_count', 0)
         self.existing_pdf_count = kwargs.pop('existing_pdf_count', 0)
         super().__init__(*args, **kwargs)
+        self.fields['sender'].required = False
+        self.fields['description'].required = True
         for name, field in self.fields.items():
             if name in {'photos', 'pdfs'}:
                 continue

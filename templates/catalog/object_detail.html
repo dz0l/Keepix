@@ -14,7 +14,7 @@
 
 <div class="card detail-grid">
   <dl class="detail-list">
-    <dt>От</dt><dd>{{ obj.sender }}</dd>
+    <dt>От</dt><dd>{{ obj.sender|default:"—" }}</dd>
     <dt>Тип</dt><dd>{{ obj.get_obj_type_display }}</dd>
     <dt>Состояние</dt>
     <dd>
@@ -35,12 +35,17 @@
 {% if photos %}
 <section class="card">
   <h2 class="section-title">Фото</h2>
-  <ul class="photo-grid detail-photos">
+  <ul class="photo-grid detail-photos" id="detail-photos">
     {% for photo in photos %}
     <li class="photo-tile">
-      <a href="{% url 'core:media_accel' photo.path_original %}">
-        <img src="{% url 'core:media_accel' photo.path_preview %}" alt="Фото {{ forloop.counter }}">
-      </a>
+      <button
+        type="button"
+        class="photo-lightbox-open"
+        data-lightbox-src="{% url 'core:media_accel' photo.path_original %}"
+        aria-label="Увеличить фото {{ forloop.counter }}"
+      >
+        <img src="{% url 'core:media_accel' photo.path_preview %}" alt="">
+      </button>
     </li>
     {% endfor %}
   </ul>
@@ -60,7 +65,7 @@
 
 <section class="card qr-card">
   <h2 class="section-title">QR-код</h2>
-  <img class="qr-image" src="{% url 'catalog:object_qr' obj.code %}" alt="QR {{ obj.code }}" width="200" height="200">
+  <img class="qr-image" src="{% url 'catalog:object_qr' obj.code %}?t={{ obj.updated_at|date:'U' }}" alt="QR {{ obj.code }}" width="200" height="200">
   <p class="muted small"><a class="btn-secondary btn-sm" href="{% url 'catalog:object_qr' obj.code %}">Скачать PNG</a></p>
 </section>
 
@@ -78,4 +83,8 @@
   </ul>
 </section>
 {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>KeepixCatalog.initPhotoLightbox();</script>
 {% endblock %}

@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load static %}
 {% block title %}{% if mode == 'create' %}Новый объект{% else %}Изменение {{ obj.code }}{% endif %} — Keepix{% endblock %}
 {% block content %}
 <section class="page-head">
@@ -20,12 +19,12 @@
   <div class="form-columns">
     <div class="form-col form-col-left">
       <label>
-        <span class="label-text">{{ form.sender.label }} *</span>
+        <span class="label-text">{{ form.sender.label }}</span>
         {{ form.sender }}
         {% if form.sender.errors %}<span class="field-error">{{ form.sender.errors.0 }}</span>{% endif %}
       </label>
       <label>
-        <span class="label-text">{{ form.description.label }}</span>
+        <span class="label-text">{{ form.description.label }} *</span>
         {{ form.description }}
         {% if form.description.errors %}<span class="field-error">{{ form.description.errors.0 }}</span>{% endif %}
       </label>
@@ -33,6 +32,11 @@
         <span class="label-text">{{ form.comment.label }}</span>
         {{ form.comment }}
         {% if form.comment.errors %}<span class="field-error">{{ form.comment.errors.0 }}</span>{% endif %}
+      </label>
+      <label>
+        <span class="label-text">{{ form.placement.label }}</span>
+        {{ form.placement }}
+        {% if form.placement.errors %}<span class="field-error">{{ form.placement.errors.0 }}</span>{% endif %}
       </label>
     </div>
 
@@ -47,31 +51,27 @@
         {{ form.condition }}
         {% if form.condition.errors %}<span class="field-error">{{ form.condition.errors.0 }}</span>{% endif %}
       </label>
-      <label>
-        <span class="label-text">{{ form.placement.label }}</span>
-        {{ form.placement }}
-        {% if form.placement.errors %}<span class="field-error">{{ form.placement.errors.0 }}</span>{% endif %}
-      </label>
 
       {% if mode == 'edit' and photos %}
       <section class="media-block">
         <h2 class="section-title">Фото</h2>
-        <p class="muted small">Перетащите для порядка. Первое фото — главное.</p>
         <ul class="photo-grid" id="photo-sortable">
           {% for photo in photos %}
           <li class="photo-tile" data-photo-id="{{ photo.pk }}" draggable="true">
-            <img src="{% url 'core:media_accel' photo.path_preview %}" alt="Фото {{ forloop.counter }}">
+            <img src="{% url 'core:media_accel' photo.path_preview %}" alt="">
           </li>
           {% endfor %}
         </ul>
       </section>
       {% endif %}
 
-      <label>
+      <div class="dropzone" data-dropzone-for="{{ form.photos.id_for_label }}">
         <span class="label-text">{{ form.photos.label }}</span>
+        <p class="dropzone-hint">Перетащите файлы сюда</p>
         {{ form.photos }}
+        <ul class="dropzone-files" data-dropzone-list="{{ form.photos.id_for_label }}" hidden></ul>
         {% if form.photos.errors %}<span class="field-error">{{ form.photos.errors.0 }}</span>{% endif %}
-      </label>
+      </div>
 
       {% if mode == 'edit' and pdfs %}
       <section class="media-block">
@@ -86,11 +86,13 @@
       </section>
       {% endif %}
 
-      <label>
+      <div class="dropzone" data-dropzone-for="{{ form.pdfs.id_for_label }}">
         <span class="label-text">{{ form.pdfs.label }}</span>
+        <p class="dropzone-hint">Перетащите файлы сюда</p>
         {{ form.pdfs }}
+        <ul class="dropzone-files" data-dropzone-list="{{ form.pdfs.id_for_label }}" hidden></ul>
         {% if form.pdfs.errors %}<span class="field-error">{{ form.pdfs.errors.0 }}</span>{% endif %}
-      </label>
+      </div>
     </div>
   </div>
 
@@ -136,7 +138,8 @@
 {% endblock %}
 
 {% block extra_js %}
-{% if mode == 'edit' and photos %}
-<script>KeepixCatalog.initPhotoSortable();</script>
-{% endif %}
+<script>
+  KeepixCatalog.initFileDropzones();
+  {% if mode == 'edit' and photos %}KeepixCatalog.initPhotoSortable();{% endif %}
+</script>
 {% endblock %}

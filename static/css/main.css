@@ -346,16 +346,16 @@ textarea.input {
 }
 
 .col-thumb {
-  width: 2.5rem;
+  width: 4.5rem;
   text-align: right;
   padding-right: 0.5rem !important;
 }
 
 .list-thumb {
-  width: 12px;
-  height: 12px;
+  width: 64px;
+  height: 64px;
   object-fit: cover;
-  border-radius: 3px;
+  border-radius: 6px;
   display: block;
   margin-left: auto;
 }
@@ -573,6 +573,111 @@ textarea.input {
 
 .hidden { display: none !important; }
 
+/* —— Dropzone —— */
+.dropzone {
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.dropzone-active {
+  border-color: var(--accent);
+  background: rgba(30, 111, 173, 0.06);
+}
+
+.dropzone-hint {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.drop-input-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.dropzone-files {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.dropzone-files li {
+  padding: 0.15rem 0;
+}
+
+/* —— Photo lightbox —— */
+.lightbox {
+  align-items: center;
+  padding: 1rem;
+}
+
+.lightbox-stage {
+  position: relative;
+  z-index: 1;
+  max-width: min(96vw, 1200px);
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-stage img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+.lightbox-nav {
+  position: relative;
+  z-index: 2;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin: 0 0.5rem;
+}
+
+.lightbox-nav:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.lightbox-nav[hidden] {
+  display: none;
+}
+
+.photo-lightbox-open {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: zoom-in;
+}
+
+.photo-lightbox-open img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 @media (max-width: 768px) {
   .container { padding: 0.75rem; }
   .topbar { padding: 0.5rem 0.75rem; }
@@ -589,8 +694,35 @@ textarea.input {
   }
 }
 
+[data-theme="dark"] {
+  --bg: #12161c;
+  --card: #1c2229;
+  --text: #e8ecf0;
+  --muted: #9aa3ad;
+  --accent: #5eb0e8;
+  --accent-hover: #7fc4f2;
+  --border: #2e3844;
+  --danger: #f97066;
+  --danger-hover: #fda29b;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .input,
+[data-theme="dark"] select.input,
+[data-theme="dark"] textarea.input {
+  background: #151a21;
+  color: var(--text);
+}
+
+[data-theme="dark"] .data-table th { background: #171d25; }
+[data-theme="dark"] .data-table tbody tr:hover { background: #1a2129; }
+[data-theme="dark"] .btn-secondary:hover,
+[data-theme="dark"] .btn-icon:hover { background: #232b35; }
+[data-theme="dark"] .modal-backdrop { background: rgba(0, 0, 0, 0.65); }
+[data-theme="dark"] .photo-tile { background: #151a21; }
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  [data-theme="system"] {
     --bg: #12161c;
     --card: #1c2229;
     --text: #e8ecf0;
@@ -603,16 +735,17 @@ textarea.input {
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
   }
 
-  .input,
-  select.input,
-  textarea.input {
+  [data-theme="system"] .input,
+  [data-theme="system"] select.input,
+  [data-theme="system"] textarea.input {
     background: #151a21;
     color: var(--text);
   }
 
-  .data-table th { background: #171d25; }
-  .data-table tbody tr:hover { background: #1a2129; }
-  .btn-secondary:hover { background: #232b35; }
-  .btn-icon:hover { background: #232b35; }
-  .modal-backdrop { background: rgba(0, 0, 0, 0.65); }
+  [data-theme="system"] .data-table th { background: #171d25; }
+  [data-theme="system"] .data-table tbody tr:hover { background: #1a2129; }
+  [data-theme="system"] .btn-secondary:hover,
+  [data-theme="system"] .btn-icon:hover { background: #232b35; }
+  [data-theme="system"] .modal-backdrop { background: rgba(0, 0, 0, 0.65); }
+  [data-theme="system"] .photo-tile { background: #151a21; }
 }

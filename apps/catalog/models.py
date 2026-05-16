@@ -59,7 +59,7 @@ class CatalogObject(models.Model):
         OTHER = 'other', 'Другое'
 
     code = models.CharField(primary_key=True, max_length=4, editable=False, verbose_name='ID')
-    sender = models.CharField(max_length=255, verbose_name='От')
+    sender = models.CharField(max_length=255, blank=True, verbose_name='От')
     obj_type = models.CharField(max_length=32, choices=ObjectType.choices, verbose_name='Тип')
     description = models.TextField(blank=True, verbose_name='Описание')
     comment = models.TextField(blank=True, verbose_name='Комментарий')

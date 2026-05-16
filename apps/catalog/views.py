@@ -214,7 +214,7 @@ def object_create(request):
                 obj.save()
 
                 ensure_object_media_dirs(code)
-                saved_paths.append(save_qr_png(code))
+                saved_paths.append(save_qr_png(obj))
 
                 if obj.placement.strip():
                     record_placement_change(obj, request.user, '', obj.placement)
@@ -280,6 +280,7 @@ def object_edit(request, code: str):
                 obj.updated_by = request.user
                 obj.save()
                 record_placement_change(obj, request.user, old_placement, obj.placement)
+                saved_paths.append(save_qr_png(obj))
                 saved_paths.extend(_attach_uploaded_files(obj, form))
             except ValueError as exc:
                 delete_paths(saved_paths)
@@ -359,7 +360,7 @@ def pdf_delete(request, code: str, pdf_id: int):
 @login_required
 def object_qr(request, code: str):
     obj = get_object_or_404(_active_queryset(), code=code)
-    rel = save_qr_png(obj.code)
+    rel = save_qr_png(obj)
     full = Path(settings.MEDIA_ROOT) / rel
     if not full.is_file():
         raise Http404()
