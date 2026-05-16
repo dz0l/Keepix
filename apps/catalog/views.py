@@ -139,7 +139,7 @@ def object_list(request):
         .prefetch_related(
             Prefetch(
                 'photos',
-                queryset=PhotoAttachment.objects.order_by('-is_primary', 'sort_order', 'pk'),
+                queryset=PhotoAttachment.objects.order_by('sort_order', 'pk'),
             )
         )
         .order_by('-updated_at', 'code')
@@ -368,6 +368,9 @@ def object_qr(request, code: str):
 
 @login_required
 def qr_search(request):
+    if request.method == 'GET':
+        return redirect(f'{reverse("catalog:object_list")}?qr=1')
+
     if request.method == 'POST':
         code = parse_object_code(request.POST.get('code', ''))
         if not code:

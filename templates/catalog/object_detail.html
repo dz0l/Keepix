@@ -2,10 +2,7 @@
 {% block title %}Объект {{ obj.code }} — Keepix{% endblock %}
 {% block content %}
 <section class="page-head">
-  <div>
-    <a class="back-link" href="{% url 'catalog:object_list' %}">← Каталог</a>
-    <h1>Объект {{ obj.code }}</h1>
-  </div>
+  <h1>Объект {{ obj.code }}</h1>
   <div class="page-actions">
     <a class="btn-secondary" href="{% url 'catalog:object_print_preview' obj.code %}">Печать</a>
     {% if is_admin %}
@@ -44,7 +41,6 @@
       <a href="{% url 'core:media_accel' photo.path_original %}">
         <img src="{% url 'core:media_accel' photo.path_preview %}" alt="Фото {{ forloop.counter }}">
       </a>
-      {% if photo.is_primary %}<span class="photo-badge">Главное</span>{% endif %}
     </li>
     {% endfor %}
   </ul>
@@ -65,7 +61,7 @@
 <section class="card qr-card">
   <h2 class="section-title">QR-код</h2>
   <img class="qr-image" src="{% url 'catalog:object_qr' obj.code %}" alt="QR {{ obj.code }}" width="200" height="200">
-  <p class="muted small"><a href="{% url 'catalog:object_qr' obj.code %}">Скачать PNG</a></p>
+  <p class="muted small"><a class="btn-secondary btn-sm" href="{% url 'catalog:object_qr' obj.code %}">Скачать PNG</a></p>
 </section>
 
 {% if placement_history %}

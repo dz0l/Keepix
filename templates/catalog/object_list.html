@@ -1,70 +1,54 @@
 {% extends "base.html" %}
-{% load static %}
 {% block title %}Каталог — Keepix{% endblock %}
 {% block content %}
 <section class="page-head">
   <h1>Каталог</h1>
   <div class="page-actions">
-    <a class="btn-secondary" href="{% url 'catalog:qr_search' %}">QR-поиск</a>
+    {% if page.object_list %}
+    <button type="submit" form="catalog-list-form" class="btn-secondary">Печать</button>
+    {% endif %}
     {% if is_admin %}
     <a class="primary" href="{% url 'catalog:object_create' %}">Добавить объект</a>
     {% endif %}
   </div>
 </section>
 
-<form class="filters card" method="get" action="{% url 'catalog:object_list' %}">
-  <div class="filters-row">
-    <label class="grow">
-      <span class="label-text">Поиск</span>
-      <input type="search" name="q" value="{{ q }}" placeholder="ID, тип, описание, комментарий, размещение" class="input">
-    </label>
-    <label>
-      <span class="label-text">Тип</span>
-      <select name="type" class="input">
-        <option value="">Все</option>
-        {% for value, label in type_choices %}
-        <option value="{{ value }}" {% if obj_type == value %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
-    </label>
-    <label>
-      <span class="label-text">Состояние</span>
-      <select name="condition" class="input">
-        <option value="">Все</option>
-        {% for value, label in condition_choices %}
-        <option value="{{ value }}" {% if condition == value %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
-    </label>
-    <button type="submit" class="primary">Найти</button>
-    {% if q or obj_type or condition %}
-    <a class="btn-secondary" href="{% url 'catalog:object_list' %}">Сброс</a>
-    {% endif %}
-  </div>
+<form class="filters" method="get" action="{% url 'catalog:object_list' %}" id="catalog-filter-form">
+  <input
+    type="search"
+    name="q"
+    value="{{ q }}"
+    class="input filter-search"
+    placeholder="Сквозной поиск"
+    autocomplete="off"
+  >
+  <select name="type" class="input filter-type" aria-label="Тип">
+    <option value="">Все типы</option>
+    {% for value, label in type_choices %}
+    <option value="{{ value }}" {% if obj_type == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
 </form>
 
 {% if page.object_list %}
-<form method="post" action="{% url 'catalog:bulk_print_submit' %}">
+<form method="post" action="{% url 'catalog:bulk_print_submit' %}" id="catalog-list-form">
   {% csrf_token %}
-  <div class="bulk-bar card">
-    <label class="bulk-select-all">
-      <input type="checkbox" id="select-all-objects">
-      <span>Выбрать все на странице</span>
-    </label>
-    <button type="submit" class="primary">Печать выбранных</button>
-  </div>
-
   <div class="table-wrap card">
     <table class="data-table">
       <thead>
         <tr>
-          <th class="col-check"></th>
-          <th class="col-thumb"></th>
+          <th class="col-check">
+            <label class="th-check">
+              <input type="checkbox" id="select-all-objects">
+              <span>Все</span>
+            </label>
+          </th>
           <th>ID</th>
           <th>От</th>
           <th>Тип</th>
           <th>Размещение</th>
           <th>Состояние</th>
+          <th class="col-thumb"></th>
         </tr>
       </thead>
       <tbody>
@@ -72,15 +56,6 @@
         <tr>
           <td class="col-check">
             <input type="checkbox" class="obj-select" name="codes" value="{{ obj.code }}">
-          </td>
-          <td class="col-thumb">
-            {% for photo in obj.photos.all %}
-            {% if forloop.first %}
-            <a href="{% url 'catalog:object_detail' obj.code %}">
-              <img class="list-thumb" src="{% url 'core:media_accel' photo.path_preview %}" alt="">
-            </a>
-            {% endif %}
-            {% endfor %}
           </td>
           <td><a href="{% url 'catalog:object_detail' obj.code %}">{{ obj.code }}</a></td>
           <td>{{ obj.sender|truncatechars:40 }}</td>
@@ -92,6 +67,15 @@
             {% else %}
             <span class="badge badge-muted">—</span>
             {% endif %}
+          </td>
+          <td class="col-thumb">
+            {% for photo in obj.photos.all %}
+            {% if forloop.first %}
+            <a href="{% url 'catalog:object_detail' obj.code %}">
+              <img class="list-thumb" src="{% url 'core:media_accel' photo.path_preview %}" alt="">
+            </a>
+            {% endif %}
+            {% endfor %}
           </td>
         </tr>
         {% endfor %}
@@ -114,12 +98,5 @@
 
 {% else %}
 <p class="empty card">Ничего не найдено.</p>
-{% endif %}
-{% endblock %}
-
-{% block extra_js %}
-{% if page.object_list %}
-<script src="{% static 'js/catalog.js' %}"></script>
-<script>KeepixCatalog.initBulkPrint();</script>
 {% endif %}
 {% endblock %}

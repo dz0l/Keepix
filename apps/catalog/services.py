@@ -59,6 +59,12 @@ def reorder_photos(obj: CatalogObject, ordered_ids: list[int]) -> None:
         photo.sort_order = index
         photo.save(update_fields=['sort_order'])
 
+    obj.photos.update(is_primary=False)
+    first = obj.photos.filter(pk=ordered_ids[0]).first()
+    if first:
+        first.is_primary = True
+        first.save(update_fields=['is_primary'])
+
 
 @transaction.atomic
 def set_primary_photo(obj: CatalogObject, photo_id: int) -> None:

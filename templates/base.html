@@ -11,12 +11,18 @@
   <header class="topbar">
     <a class="brand" href="{% url 'catalog:object_list' %}">Keepix</a>
     {% if user.is_authenticated %}
-    <a class="nav-link" href="{% url 'catalog:object_list' %}">Каталог</a>
-    <a class="nav-link" href="{% url 'catalog:qr_search' %}">QR</a>
-    <span class="user">{{ user.username }}</span>
-    <form class="inline" method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
-      <button type="submit" class="linkish">Выйти</button>
-    </form>
+    <button type="button" class="btn-icon" id="qr-open-btn" aria-label="Поиск по ID" title="Поиск по ID">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm12 2.5h1.5V13H15v2.5zm-3 0H13V13h-1.5v2.5zM15 19h1.5v-2.5H15V19zm3 0h1.5v-2.5H18V19zm-3-6H18V13h-1.5v2.5zM21 13h-1.5v2.5H21V13zm-6 6h1.5V19H15v-2.5z"/></svg>
+    </button>
+    <div class="topbar-right">
+      <span class="user-chip">
+        <svg class="icon icon-user" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9zm0 2.25c-4.28 0-7.75 2.13-7.75 4.75V21h15.5v-1.75c0-2.62-3.47-4.75-7.75-4.75z"/></svg>
+        <span>{{ user.username }}</span>
+      </span>
+      <form class="inline" method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
+        <button type="submit" class="btn-secondary btn-sm">Выйти</button>
+      </form>
+    </div>
     {% endif %}
   </header>
   <main class="container">
@@ -27,6 +33,33 @@
     {% endif %}
     {% block content %}{% endblock %}
   </main>
+
+  {% if user.is_authenticated %}
+  <div id="qr-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="qr-modal-title">
+    <div class="modal-backdrop" data-qr-close></div>
+    <div class="modal-panel card">
+      <h2 id="qr-modal-title" class="modal-title">ID объекта</h2>
+      <form method="post" action="{% url 'catalog:qr_search' %}" id="qr-modal-form">
+        {% csrf_token %}
+        <input
+          type="text"
+          name="code"
+          id="qr-code-input"
+          class="input input-lg"
+          inputmode="numeric"
+          autocomplete="off"
+          placeholder="0001"
+          maxlength="16"
+        >
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
   {% block extra_js %}{% endblock %}
+  {% if user.is_authenticated %}
+  <script src="{% static 'js/catalog.js' %}"></script>
+  <script>KeepixCatalog.initGlobal();</script>
+  {% endif %}
 </body>
 </html>

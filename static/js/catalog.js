@@ -49,110 +49,135 @@ const KeepixCatalog = (function () {
     syncOrder();
   }
 
-  function initQrSearch() {
-    const startBtn = document.getElementById('qr-scanner-start');
-    const stopBtn = document.getElementById('qr-scanner-stop');
-    const wrap = document.getElementById('qr-scanner-wrap');
-    const video = document.getElementById('qr-video');
+  function initQrModal() {
+    const modal = document.getElementById('qr-modal');
+    const openBtn = document.getElementById('qr-open-btn');
+    const form = document.getElementById('qr-modal-form');
     const input = document.getElementById('qr-code-input');
-    const form = document.getElementById('qr-manual-form');
+    if (!modal || !form || !input) return;
 
-    if (!startBtn || !video || !form) return;
-
-    let stream = null;
-    let rafId = null;
-
-    function stopCamera() {
-      if (rafId) {
-        cancelAnimationFrame(rafId);
-        rafId = null;
-      }
-      if (stream) {
-        stream.getTracks().forEach((t) => t.stop());
-        stream = null;
-      }
-      video.srcObject = null;
-      wrap.classList.add('hidden');
+    function openModal() {
+      modal.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+      window.setTimeout(() => {
+        input.value = '';
+        input.focus();
+        input.select();
+      }, 0);
     }
 
-    function submitCode(raw) {
-      const code = parseCode(raw);
-      if (!code) {
-        window.alert('Не удалось распознать ID объекта.');
-        return;
-      }
-      input.value = code;
-      stopCamera();
-      form.submit();
+    function closeModal() {
+      modal.classList.add('hidden');
+      document.body.classList.remove('modal-open');
     }
 
-    async function scanLoop(detector) {
-      if (!stream) return;
-      try {
-        const codes = await detector.detect(video);
-        if (codes.length > 0) {
-          submitCode(codes[0].rawValue);
-          return;
-        }
-      } catch (_err) {
-        /* ignore frame errors */
-      }
-      rafId = requestAnimationFrame(() => scanLoop(detector));
+    if (openBtn) {
+      openBtn.addEventListener('click', openModal);
     }
 
-    async function startCamera() {
-      if (!('BarcodeDetector' in window)) {
-        window.alert('Сканер QR недоступен в этом браузере. Введите ID вручную.');
-        return;
+    modal.querySelectorAll('[data-qr-close]').forEach((el) => {
+      el.addEventListener('click', closeModal);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+        closeModal();
       }
-
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' } },
-          audio: false,
-        });
-      } catch (_err) {
-        window.alert('Не удалось открыть камеру. Проверьте разрешения.');
-        return;
-      }
-
-      video.srcObject = stream;
-      await video.play();
-      wrap.classList.remove('hidden');
-
-      const detector = new BarcodeDetector({ formats: ['qr_code'] });
-      scanLoop(detector);
-    }
-
-    startBtn.addEventListener('click', startCamera);
-    stopBtn.addEventListener('click', stopCamera);
+    });
 
     form.addEventListener('submit', (e) => {
       const code = parseCode(input.value);
       if (!code) {
         e.preventDefault();
         window.alert('Введите корректный ID (1–9999).');
-      } else {
-        input.value = code;
+        return;
       }
+      input.value = code;
     });
+
+    if (new URLSearchParams(window.location.search).get('qr') === '1') {
+      openModal();
+      const url = new URL(window.location.href);
+      url.searchParams.delete('qr');
+      window.history.replaceState({}, '', url);
+    }
   }
 
   function initBulkPrint() {
     const selectAll = document.getElementById('select-all-objects');
-    const checkboxes = document.querySelectorAll('.obj-select');
-    if (!selectAll || !checkboxes.length) return;
+    const form = document.getElementById('catalog-list-form');
+    if (!selectAll || !form) return;
+
+    function getCheckboxes() {
+      return form.querySelectorAll('.obj-select');
+    }
+
+    function syncSelectAllState() {
+      const boxes = getCheckboxes();
+      if (!boxes.length) {
+        selectAll.checked = false;
+        selectAll.indeterminate = false;
+        return;
+      }
+      const checked = Array.from(boxes).filter((cb) => cb.checked).length;
+      selectAll.checked = checked === boxes.length;
+      selectAll.indeterminate = checked > 0 && checked < boxes.length;
+    }
 
     selectAll.addEventListener('change', () => {
-      checkboxes.forEach((cb) => {
-        cb.checked = selectAll.checked;
+      const checked = selectAll.checked;
+      getCheckboxes().forEach((cb) => {
+        cb.checked = checked;
       });
+      selectAll.indeterminate = false;
     });
+
+    form.addEventListener('change', (e) => {
+      if (e.target.classList.contains('obj-select')) {
+        syncSelectAllState();
+      }
+    });
+
+    form.addEventListener('submit', (e) => {
+      const checked = form.querySelectorAll('.obj-select:checked');
+      if (!checked.length) {
+        e.preventDefault();
+        window.alert('Выберите хотя бы один объект для печати.');
+      }
+    });
+
+    syncSelectAllState();
+  }
+
+  function initCatalogFilters() {
+    const form = document.getElementById('catalog-filter-form');
+    if (!form) return;
+
+    const search = form.querySelector('.filter-search');
+    const typeSelect = form.querySelector('.filter-type');
+
+    if (typeSelect) {
+      typeSelect.addEventListener('change', () => form.submit());
+    }
+
+    if (search) {
+      search.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          form.submit();
+        }
+      });
+    }
+  }
+
+  function initGlobal() {
+    initQrModal();
+    initBulkPrint();
+    initCatalogFilters();
   }
 
   return {
     initPhotoSortable,
-    initQrSearch,
-    initBulkPrint,
+    initGlobal,
   };
 })();

@@ -2,16 +2,13 @@
 {% block title %}Печать — Keepix{% endblock %}
 {% block content %}
 <section class="page-head">
-  <div>
-    <a class="back-link" href="{% url 'catalog:object_list' %}">← Каталог</a>
-    <h1>Предпросмотр печати</h1>
-  </div>
+  <h1>Предпросмотр печати</h1>
   <div class="page-actions">
     <a class="btn-secondary" href="{{ pdf_download_url }}">Скачать PDF</a>
   </div>
 </section>
 
-<p class="muted">
+<p class="muted print-meta">
   {% if codes|length == 1 %}
   Объект {{ codes.0 }} — {{ page_count }} стр.
   {% else %}

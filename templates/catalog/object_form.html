@@ -3,13 +3,10 @@
 {% block title %}{% if mode == 'create' %}Новый объект{% else %}Изменение {{ obj.code }}{% endif %} — Keepix{% endblock %}
 {% block content %}
 <section class="page-head">
-  <div>
-    <a class="back-link" href="{% if mode == 'edit' %}{% url 'catalog:object_detail' obj.code %}{% else %}{% url 'catalog:object_list' %}{% endif %}">← Назад</a>
-    <h1>{% if mode == 'create' %}Новый объект{% else %}Изменение {{ obj.code }}{% endif %}</h1>
-  </div>
+  <h1>{% if mode == 'create' %}Новый объект{% else %}Изменение {{ obj.code }}{% endif %}</h1>
 </section>
 
-<form class="card stack" method="post" enctype="multipart/form-data" id="object-form">
+<form class="card object-form" method="post" enctype="multipart/form-data" id="object-form">
   {% csrf_token %}
   {% if mode == 'edit' %}
   <input type="hidden" name="updated_at" value="{{ obj.updated_at|date:'c' }}">
@@ -20,55 +17,82 @@
   <ul class="form-errors">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>
   {% endif %}
 
-  {% for field in form %}
-    {% if field.name != 'photos' and field.name != 'pdfs' %}
-    <label>
-      <span class="label-text">{{ field.label }}{% if field.field.required %} *{% endif %}</span>
-      {{ field }}
-      {% if field.errors %}<span class="field-error">{{ field.errors.0 }}</span>{% endif %}
-    </label>
-    {% endif %}
-  {% endfor %}
+  <div class="form-columns">
+    <div class="form-col form-col-left">
+      <label>
+        <span class="label-text">{{ form.sender.label }} *</span>
+        {{ form.sender }}
+        {% if form.sender.errors %}<span class="field-error">{{ form.sender.errors.0 }}</span>{% endif %}
+      </label>
+      <label>
+        <span class="label-text">{{ form.description.label }}</span>
+        {{ form.description }}
+        {% if form.description.errors %}<span class="field-error">{{ form.description.errors.0 }}</span>{% endif %}
+      </label>
+      <label>
+        <span class="label-text">{{ form.comment.label }}</span>
+        {{ form.comment }}
+        {% if form.comment.errors %}<span class="field-error">{{ form.comment.errors.0 }}</span>{% endif %}
+      </label>
+    </div>
 
-  {% if mode == 'edit' and photos %}
-  <section class="media-block">
-    <h2 class="section-title">Фото</h2>
-    <p class="muted small">Перетащите для изменения порядка. Сохраните форму, чтобы применить порядок.</p>
-    <ul class="photo-grid" id="photo-sortable">
-      {% for photo in photos %}
-      <li class="photo-tile" data-photo-id="{{ photo.pk }}" draggable="true">
-        <img src="{% url 'core:media_accel' photo.path_preview %}" alt="Фото {{ forloop.counter }}">
-        {% if photo.is_primary %}<span class="photo-badge">Главное</span>{% endif %}
-      </li>
-      {% endfor %}
-    </ul>
-  </section>
-  {% endif %}
+    <div class="form-col form-col-right">
+      <label>
+        <span class="label-text">{{ form.obj_type.label }} *</span>
+        {{ form.obj_type }}
+        {% if form.obj_type.errors %}<span class="field-error">{{ form.obj_type.errors.0 }}</span>{% endif %}
+      </label>
+      <label>
+        <span class="label-text">{{ form.condition.label }}</span>
+        {{ form.condition }}
+        {% if form.condition.errors %}<span class="field-error">{{ form.condition.errors.0 }}</span>{% endif %}
+      </label>
+      <label>
+        <span class="label-text">{{ form.placement.label }}</span>
+        {{ form.placement }}
+        {% if form.placement.errors %}<span class="field-error">{{ form.placement.errors.0 }}</span>{% endif %}
+      </label>
 
-  <label>
-    <span class="label-text">{{ form.photos.label }}</span>
-    {{ form.photos }}
-    {% if form.photos.errors %}<span class="field-error">{{ form.photos.errors.0 }}</span>{% endif %}
-  </label>
+      {% if mode == 'edit' and photos %}
+      <section class="media-block">
+        <h2 class="section-title">Фото</h2>
+        <p class="muted small">Перетащите для порядка. Первое фото — главное.</p>
+        <ul class="photo-grid" id="photo-sortable">
+          {% for photo in photos %}
+          <li class="photo-tile" data-photo-id="{{ photo.pk }}" draggable="true">
+            <img src="{% url 'core:media_accel' photo.path_preview %}" alt="Фото {{ forloop.counter }}">
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endif %}
 
-  {% if mode == 'edit' and pdfs %}
-  <section class="media-block">
-    <h2 class="section-title">PDF</h2>
-    <ul class="pdf-list">
-      {% for pdf in pdfs %}
-      <li>
-        <a href="{% url 'core:download_pdf_attachment' pdf.pk %}">{{ pdf.original_name }}</a>
-      </li>
-      {% endfor %}
-    </ul>
-  </section>
-  {% endif %}
+      <label>
+        <span class="label-text">{{ form.photos.label }}</span>
+        {{ form.photos }}
+        {% if form.photos.errors %}<span class="field-error">{{ form.photos.errors.0 }}</span>{% endif %}
+      </label>
 
-  <label>
-    <span class="label-text">{{ form.pdfs.label }}</span>
-    {{ form.pdfs }}
-    {% if form.pdfs.errors %}<span class="field-error">{{ form.pdfs.errors.0 }}</span>{% endif %}
-  </label>
+      {% if mode == 'edit' and pdfs %}
+      <section class="media-block">
+        <h2 class="section-title">PDF</h2>
+        <ul class="pdf-list">
+          {% for pdf in pdfs %}
+          <li>
+            <a href="{% url 'core:download_pdf_attachment' pdf.pk %}">{{ pdf.original_name }}</a>
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endif %}
+
+      <label>
+        <span class="label-text">{{ form.pdfs.label }}</span>
+        {{ form.pdfs }}
+        {% if form.pdfs.errors %}<span class="field-error">{{ form.pdfs.errors.0 }}</span>{% endif %}
+      </label>
+    </div>
+  </div>
 
   <div class="form-actions">
     <button type="submit" class="primary">Сохранить</button>
@@ -82,16 +106,10 @@
   <ul class="photo-actions-list">
     {% for photo in photos %}
     <li>
-      <span>{% if photo.is_primary %}★ {% endif %}Фото #{{ forloop.counter }}</span>
-      {% if not photo.is_primary %}
-      <form method="post" action="{% url 'catalog:photo_set_primary' obj.code photo.pk %}" class="inline">
-        {% csrf_token %}
-        <button type="submit" class="linkish">Сделать главным</button>
-      </form>
-      {% endif %}
+      <span>Фото #{{ forloop.counter }}</span>
       <form method="post" action="{% url 'catalog:photo_delete' obj.code photo.pk %}" class="inline" onsubmit="return confirm('Удалить это фото?');">
         {% csrf_token %}
-        <button type="submit" class="linkish danger-text">Удалить</button>
+        <button type="submit" class="btn-danger btn-sm">Удалить</button>
       </form>
     </li>
     {% endfor %}
@@ -108,7 +126,7 @@
       <a href="{% url 'core:download_pdf_attachment' pdf.pk %}">{{ pdf.original_name }}</a>
       <form method="post" action="{% url 'catalog:pdf_delete' obj.code pdf.pk %}" class="inline" onsubmit="return confirm('Удалить этот PDF?');">
         {% csrf_token %}
-        <button type="submit" class="linkish danger-text">Удалить</button>
+        <button type="submit" class="btn-danger btn-sm">Удалить</button>
       </form>
     </li>
     {% endfor %}
@@ -119,7 +137,6 @@
 
 {% block extra_js %}
 {% if mode == 'edit' and photos %}
-<script src="{% static 'js/catalog.js' %}"></script>
 <script>KeepixCatalog.initPhotoSortable();</script>
 {% endif %}
 {% endblock %}
