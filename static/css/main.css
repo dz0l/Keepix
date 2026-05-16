@@ -10,6 +10,9 @@
   --danger: #b42318;
   --danger-hover: #912018;
   --shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+  --msg-bg: #fff3cd;
+  --msg-border: #c9a227;
+  --msg-text: #3d3200;
 }
 
 * { box-sizing: border-box; }
@@ -419,9 +422,10 @@ textarea.input {
   list-style: none;
   padding: 0.75rem 1rem;
   margin: 0 0 1rem;
-  background: #fff8e6;
-  border: 1px solid #f0d78c;
+  background: var(--msg-bg);
+  border: 1px solid var(--msg-border);
   border-radius: 8px;
+  color: var(--msg-text);
 }
 
 .messages li { margin: 0.25rem 0; }
@@ -705,6 +709,9 @@ textarea.input {
   --danger: #f97066;
   --danger-hover: #fda29b;
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --msg-bg: #3d3520;
+  --msg-border: #8a7340;
+  --msg-text: #f0e4c0;
 }
 
 [data-theme="dark"] .input,
@@ -733,6 +740,9 @@ textarea.input {
     --danger: #f97066;
     --danger-hover: #fda29b;
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    --msg-bg: #3d3520;
+    --msg-border: #8a7340;
+    --msg-text: #f0e4c0;
   }
 
   [data-theme="system"] .input,

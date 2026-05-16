@@ -5,6 +5,8 @@ from pathlib import Path
 
 from django.conf import settings
 from django.utils import timezone
+
+from keepix.public_url import build_object_public_url
 from PIL import Image, UnidentifiedImageError
 import qrcode
 
@@ -77,7 +79,7 @@ def build_qr_payload(obj: CatalogObject) -> str:
 
     created = timezone.localtime(obj.created_at).strftime('%d.%m.%Y %H:%M')
     updated = timezone.localtime(obj.updated_at).strftime('%d.%m.%Y %H:%M')
-    url = settings.build_object_public_url(obj.code)
+    url = build_object_public_url(obj.code)
 
     lines = [
         f'ID: {obj.code}',

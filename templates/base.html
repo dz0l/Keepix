@@ -72,9 +72,11 @@
   </div>
   {% endif %}
 
-  {% block extra_js %}{% endblock %}
   {% if user.is_authenticated %}
   <script src="{% static 'js/catalog.js' %}"></script>
+  {% endif %}
+  {% block extra_js %}{% endblock %}
+  {% if user.is_authenticated %}
   <script>KeepixCatalog.initGlobal();</script>
   {% endif %}
 </body>
