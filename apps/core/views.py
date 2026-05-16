@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.http import FileResponse, Http404, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
 from apps.accounts.models import User
 from apps.catalog.models import CatalogObject, PdfAttachment
@@ -26,11 +26,10 @@ def health_ready(request):
 
 @login_required
 def home(request):
-    return render(request, 'core/home.html')
+    return redirect('catalog:object_list')
 
 
 def _authorize_media_rel_path(user, rel_normalized: str) -> bool:
-    """Путь относительно MEDIA_ROOT: objects/<code>/photos|pdf|qr/..."""
     parts = rel_normalized.strip('/').split('/')
     if len(parts) < 3 or parts[0] != 'objects':
         return False
@@ -56,7 +55,6 @@ def _authorize_media_rel_path(user, rel_normalized: str) -> bool:
 
 @login_required
 def accel_media(request, rel_path: str):
-    """Авторизованная раздача; nginx — X-Accel-Redirect."""
     rel = rel_path.lstrip('/')
     if '..' in rel or rel.startswith('/'):
         raise Http404()

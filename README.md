@@ -16,7 +16,7 @@ Deploy and operate the Keepix catalogue application on your own server.
 Remote script (recommended):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dz0l/Keepix/main/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/dz0l/Keepix/master/install.sh | sudo bash
 ```
 
 Creates `/opt/keepix` by default (`KEEPIX_INSTALL_DIR`), installs Docker where needed, writes `.env` (generated `SECRET_KEY` and PostgreSQL credentials), configures `ALLOWED_HOSTS`, and starts Compose.
@@ -66,7 +66,7 @@ Exported in the shell before `curl … | bash` or `scripts/install_docker.sh`:
 Host port override example:
 
 ```bash
-sudo KEEPIX_APP_PORT=8080 bash -c 'curl -fsSL https://raw.githubusercontent.com/dz0l/Keepix/main/install.sh | bash'
+sudo KEEPIX_APP_PORT=8080 bash -c 'curl -fsSL https://raw.githubusercontent.com/dz0l/Keepix/master/install.sh | bash'
 ```
 
 ---

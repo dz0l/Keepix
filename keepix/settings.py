@@ -114,7 +114,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.User'
 
 LOGIN_URL = 'accounts:login'
-LOGIN_REDIRECT_URL = 'core:home'
+LOGIN_REDIRECT_URL = 'catalog:object_list'
 LOGOUT_REDIRECT_URL = 'accounts:login'
 
 SESSION_COOKIE_AGE = 60 * 60 * 8

@@ -31,7 +31,7 @@ if [[ -n "${PRIMARY_IP:-}" && "$PRIMARY_IP" != '127.0.0.1' ]]; then
   ALLOWED_HOSTS_DEFAULT="${ALLOWED_HOSTS_DEFAULT},${PRIMARY_IP}"
 fi
 
-# По умолчанию — полностью автоматически (без вопросов): для интерактива задайте KEEPIX_INTERACTIVE=1.
+# По умолчанию — полностью автоматически: для интерактива задайте KEEPIX_INTERACTIVE=1.
 AUTO_INSTALL=1
 if [[ "${KEEPIX_INTERACTIVE:-0}" == '1' && -t 0 && -t 1 ]]; then
   AUTO_INSTALL=0
