@@ -34,9 +34,42 @@
   </dl>
 </div>
 
+{% if photos %}
+<section class="card">
+  <h2 class="section-title">Фото</h2>
+  <ul class="photo-grid detail-photos">
+    {% for photo in photos %}
+    <li class="photo-tile">
+      <a href="{% url 'core:media_accel' photo.path_original %}">
+        <img src="{% url 'core:media_accel' photo.path_preview %}" alt="Фото {{ forloop.counter }}">
+      </a>
+      {% if photo.is_primary %}<span class="photo-badge">Главное</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if pdfs %}
+<section class="card">
+  <h2 class="section-title">PDF</h2>
+  <ul class="pdf-list">
+    {% for pdf in pdfs %}
+    <li><a href="{% url 'core:download_pdf_attachment' pdf.pk %}">{{ pdf.original_name }}</a></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<section class="card qr-card">
+  <h2 class="section-title">QR-код</h2>
+  <img class="qr-image" src="{% url 'catalog:object_qr' obj.code %}" alt="QR {{ obj.code }}" width="200" height="200">
+  <p class="muted small"><a href="{% url 'catalog:object_qr' obj.code %}">Скачать PNG</a></p>
+</section>
+
 {% if placement_history %}
 <section class="card">
-  <h2>История размещения</h2>
+  <h2 class="section-title">История размещения</h2>
   <ul class="history-list">
     {% for row in placement_history %}
     <li>
@@ -48,6 +81,4 @@
   </ul>
 </section>
 {% endif %}
-
-<p class="muted note">Фото и PDF — на следующем этапе.</p>
 {% endblock %}

@@ -298,6 +298,117 @@ textarea.input { resize: vertical; min-height: 4rem; }
   color: var(--muted);
 }
 
+.hidden { display: none !important; }
+
+.small { font-size: 0.85rem; }
+
+.section-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+}
+
+.media-block { margin-top: 0.5rem; }
+
+.photo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.photo-tile {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #f8f9fb;
+  cursor: grab;
+}
+
+.photo-tile.dragging { opacity: 0.55; }
+
+.photo-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-badge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.35rem;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  text-align: center;
+}
+
+.detail-photos .photo-tile { cursor: default; }
+
+.list-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+}
+
+.col-thumb { width: 48px; }
+
+.pdf-list,
+.photo-actions-list,
+.pdf-actions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pdf-list li,
+.photo-actions-list li,
+.pdf-actions-list li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.pdf-list li:last-child,
+.photo-actions-list li:last-child,
+.pdf-actions-list li:last-child {
+  border-bottom: none;
+}
+
+.danger-text { color: var(--danger); }
+
+.qr-card { text-align: center; }
+
+.qr-image {
+  max-width: 200px;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.qr-scanner-wrap video {
+  width: 100%;
+  max-width: 360px;
+  border-radius: 8px;
+  background: #000;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.qr-search .primary { margin-bottom: 0.5rem; }
+
 @media (max-width: 640px) {
   .page-head { flex-direction: column; }
   .filters-row { flex-direction: column; align-items: stretch; }

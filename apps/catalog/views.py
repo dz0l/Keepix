@@ -1,22 +1,39 @@
 import logging
 import re
+from pathlib import Path
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Prefetch, Q
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
+from django.views.decorators.http import require_POST
 
+from .file_utils import (
+    delete_paths,
+    delete_photo_files,
+    next_photo_slot,
+    parse_object_code,
+    save_pdf,
+    save_photo,
+    save_qr_png,
+)
 from .forms import CatalogObjectForm
-from .models import CatalogObject, ObjectIdSequence
+from .models import CatalogObject, ObjectIdSequence, PdfAttachment, PhotoAttachment
 from .permissions import catalog_admin_required
 from .services import (
+    delete_pdf,
+    delete_photo,
     ensure_object_media_dirs,
     record_placement_change,
+    reorder_photos,
+    set_primary_photo,
     soft_delete_object,
 )
 
@@ -64,9 +81,66 @@ def _check_version(obj: CatalogObject, posted: str) -> bool:
     return obj.updated_at == parsed
 
 
+def _attach_uploaded_files(obj: CatalogObject, form: CatalogObjectForm) -> list[str]:
+    saved_paths: list[str] = []
+    for photo_file in form.cleaned_data.get('photos') or []:
+        slot = next_photo_slot(obj)
+        rel, rel_preview, size = save_photo(obj.code, photo_file, slot)
+        saved_paths.extend([rel, rel_preview])
+        is_first = not obj.photos.exists()
+        PhotoAttachment.objects.create(
+            catalog_object=obj,
+            path_original=rel,
+            path_preview=rel_preview,
+            original_name=photo_file.name,
+            sort_order=slot,
+            is_primary=is_first,
+            size=size,
+        )
+
+    pdf_count = obj.pdfs.count()
+    for pdf_file in form.cleaned_data.get('pdfs') or []:
+        slot = pdf_count + 1
+        pdf_count += 1
+        rel, size = save_pdf(obj.code, pdf_file, slot)
+        saved_paths.append(rel)
+        PdfAttachment.objects.create(
+            catalog_object=obj,
+            path=rel,
+            original_name=pdf_file.name,
+            size=size,
+        )
+    return saved_paths
+
+
+def _form_context(form, mode, obj=None):
+    photos = []
+    pdfs = []
+    if obj:
+        photos = list(obj.photos.order_by('sort_order', 'pk'))
+        pdfs = list(obj.pdfs.order_by('pk'))
+    return {
+        'form': form,
+        'mode': mode,
+        'obj': obj,
+        'photos': photos,
+        'pdfs': pdfs,
+        'photo_order': ','.join(str(p.pk) for p in photos),
+    }
+
+
 @login_required
 def object_list(request):
-    qs = _active_queryset().order_by('-updated_at', 'code')
+    qs = (
+        _active_queryset()
+        .prefetch_related(
+            Prefetch(
+                'photos',
+                queryset=PhotoAttachment.objects.order_by('-is_primary', 'sort_order', 'pk'),
+            )
+        )
+        .order_by('-updated_at', 'code')
+    )
 
     q = request.GET.get('q', '')
     qs = _apply_search(qs, q)
@@ -103,13 +177,18 @@ def object_list(request):
 
 @login_required
 def object_detail(request, code: str):
-    obj = get_object_or_404(_active_queryset(), code=code)
+    obj = get_object_or_404(
+        _active_queryset().prefetch_related('photos', 'pdfs'),
+        code=code,
+    )
     placement_history = obj.placement_history.select_related('changed_by')[:20]
     return render(
         request,
         'catalog/object_detail.html',
         {
             'obj': obj,
+            'photos': obj.photos.order_by('sort_order', 'pk'),
+            'pdfs': obj.pdfs.all(),
             'placement_history': placement_history,
             'is_admin': request.user.is_catalog_admin(),
         },
@@ -120,23 +199,33 @@ def object_detail(request, code: str):
 @transaction.atomic
 def object_create(request):
     if request.method == 'POST':
-        form = CatalogObjectForm(request.POST)
+        form = CatalogObjectForm(request.POST, request.FILES)
         if form.is_valid():
+            saved_paths: list[str] = []
             try:
                 code = ObjectIdSequence.allocate_code()
-            except ValidationError as exc:
-                messages.error(request, '; '.join(getattr(exc, 'messages', [str(exc)])))
-                return render(request, 'catalog/object_form.html', {'form': form, 'mode': 'create'})
+                obj = form.save(commit=False)
+                obj.code = code
+                obj.created_by = request.user
+                obj.updated_by = request.user
+                obj.save()
 
-            obj = form.save(commit=False)
-            obj.code = code
-            obj.created_by = request.user
-            obj.updated_by = request.user
-            obj.save()
+                ensure_object_media_dirs(code)
+                saved_paths.append(save_qr_png(code))
 
-            ensure_object_media_dirs(code)
-            if obj.placement.strip():
-                record_placement_change(obj, request.user, '', obj.placement)
+                if obj.placement.strip():
+                    record_placement_change(obj, request.user, '', obj.placement)
+
+                saved_paths.extend(_attach_uploaded_files(obj, form))
+            except (ValidationError, ValueError) as exc:
+                delete_paths(saved_paths)
+                messages.error(request, str(exc) if isinstance(exc, ValueError) else '; '.join(exc.messages))
+                return render(request, 'catalog/object_form.html', _form_context(form, 'create'))
+            except Exception:
+                logger.exception('object create failed during file save')
+                delete_paths(saved_paths)
+                messages.error(request, 'Ошибка при сохранении файлов.')
+                return render(request, 'catalog/object_form.html', _form_context(form, 'create'))
 
             logger.info('object %s created by %s', code, request.user.username)
             messages.success(request, f'Объект {code} добавлен.')
@@ -144,7 +233,7 @@ def object_create(request):
     else:
         form = CatalogObjectForm()
 
-    return render(request, 'catalog/object_form.html', {'form': form, 'mode': 'create'})
+    return render(request, 'catalog/object_form.html', _form_context(form, 'create'))
 
 
 @catalog_admin_required
@@ -159,30 +248,57 @@ def object_edit(request, code: str):
                 request,
                 'Запись была изменена другим пользователем. Обновите страницу и повторите.',
             )
-            form = CatalogObjectForm(request.POST, instance=obj)
-            return render(
-                request,
-                'catalog/object_form.html',
-                {'form': form, 'mode': 'edit', 'obj': obj},
+            form = CatalogObjectForm(
+                request.POST,
+                request.FILES,
+                instance=obj,
+                existing_photo_count=obj.photos.count(),
+                existing_pdf_count=obj.pdfs.count(),
             )
+            return render(request, 'catalog/object_form.html', _form_context(form, 'edit', obj))
 
-        form = CatalogObjectForm(request.POST, instance=obj)
+        form = CatalogObjectForm(
+            request.POST,
+            request.FILES,
+            instance=obj,
+            existing_photo_count=obj.photos.count(),
+            existing_pdf_count=obj.pdfs.count(),
+        )
         if form.is_valid():
-            obj = form.save(commit=False)
-            obj.updated_by = request.user
-            obj.save()
-            record_placement_change(obj, request.user, old_placement, obj.placement)
+            saved_paths: list[str] = []
+            try:
+                order_raw = request.POST.get('photo_order', '').strip()
+                if order_raw:
+                    ordered_ids = [int(x) for x in order_raw.split(',') if x.strip().isdigit()]
+                    if ordered_ids:
+                        reorder_photos(obj, ordered_ids)
+
+                obj = form.save(commit=False)
+                obj.updated_by = request.user
+                obj.save()
+                record_placement_change(obj, request.user, old_placement, obj.placement)
+                saved_paths.extend(_attach_uploaded_files(obj, form))
+            except ValueError as exc:
+                delete_paths(saved_paths)
+                messages.error(request, str(exc))
+                return render(request, 'catalog/object_form.html', _form_context(form, 'edit', obj))
+            except Exception:
+                logger.exception('object edit failed during file save')
+                delete_paths(saved_paths)
+                messages.error(request, 'Ошибка при сохранении файлов.')
+                return render(request, 'catalog/object_form.html', _form_context(form, 'edit', obj))
+
             logger.info('object %s updated by %s', obj.code, request.user.username)
             messages.success(request, f'Объект {obj.code} сохранён.')
             return redirect('catalog:object_detail', code=obj.code)
     else:
-        form = CatalogObjectForm(instance=obj)
+        form = CatalogObjectForm(
+            instance=obj,
+            existing_photo_count=obj.photos.count(),
+            existing_pdf_count=obj.pdfs.count(),
+        )
 
-    return render(
-        request,
-        'catalog/object_form.html',
-        {'form': form, 'mode': 'edit', 'obj': obj},
-    )
+    return render(request, 'catalog/object_form.html', _form_context(form, 'edit', obj))
 
 
 @catalog_admin_required
@@ -199,3 +315,63 @@ def object_delete(request, code: str):
         return redirect('catalog:object_list')
 
     return render(request, 'catalog/object_confirm_delete.html', {'obj': obj})
+
+
+@catalog_admin_required
+@require_POST
+def photo_delete(request, code: str, photo_id: int):
+    obj = get_object_or_404(_active_queryset(), code=code)
+    try:
+        delete_photo(obj, photo_id)
+        messages.success(request, 'Фото удалено.')
+    except ValueError as exc:
+        messages.error(request, str(exc))
+    return redirect('catalog:object_edit', code=code)
+
+
+@catalog_admin_required
+@require_POST
+def photo_set_primary(request, code: str, photo_id: int):
+    obj = get_object_or_404(_active_queryset(), code=code)
+    try:
+        set_primary_photo(obj, photo_id)
+        messages.success(request, 'Главное фото обновлено.')
+    except ValueError as exc:
+        messages.error(request, str(exc))
+    return redirect('catalog:object_edit', code=code)
+
+
+@catalog_admin_required
+@require_POST
+def pdf_delete(request, code: str, pdf_id: int):
+    obj = get_object_or_404(_active_queryset(), code=code)
+    try:
+        delete_pdf(obj, pdf_id)
+        messages.success(request, 'PDF удалён.')
+    except ValueError as exc:
+        messages.error(request, str(exc))
+    return redirect('catalog:object_edit', code=code)
+
+
+@login_required
+def object_qr(request, code: str):
+    obj = get_object_or_404(_active_queryset(), code=code)
+    rel = save_qr_png(obj.code)
+    full = Path(settings.MEDIA_ROOT) / rel
+    if not full.is_file():
+        raise Http404()
+    return HttpResponse(full.read_bytes(), content_type='image/png')
+
+
+@login_required
+def qr_search(request):
+    if request.method == 'POST':
+        code = parse_object_code(request.POST.get('code', ''))
+        if not code:
+            messages.error(request, 'Введите корректный ID объекта (до 4 цифр).')
+            return render(request, 'catalog/qr_search.html')
+        if not _active_queryset().filter(code=code).exists():
+            messages.error(request, f'Объект {code} не найден.')
+            return render(request, 'catalog/qr_search.html')
+        return redirect('catalog:object_detail', code=code)
+    return render(request, 'catalog/qr_search.html')

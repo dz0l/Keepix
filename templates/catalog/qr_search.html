@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Поиск по QR — Keepix{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <a class="back-link" href="{% url 'catalog:object_list' %}">← Каталог</a>
+    <h1>Поиск по QR</h1>
+  </div>
+</section>
+
+<div class="card stack qr-search">
+  <p class="muted">Отсканируйте QR-код объекта или введите ID (до 4 цифр).</p>
+
+  <div class="qr-scanner-wrap hidden" id="qr-scanner-wrap">
+    <video id="qr-video" playsinline muted></video>
+    <button type="button" class="btn-secondary" id="qr-scanner-stop">Остановить камеру</button>
+  </div>
+
+  <button type="button" class="primary" id="qr-scanner-start">Сканировать камерой</button>
+
+  <form method="post" id="qr-manual-form">
+    {% csrf_token %}
+    <label>
+      <span class="label-text">ID объекта</span>
+      <input type="text" name="code" id="qr-code-input" class="input" inputmode="numeric" autocomplete="off" placeholder="0001">
+    </label>
+    <button type="submit" class="primary">Открыть объект</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/catalog.js' %}"></script>
+<script>KeepixCatalog.initQrSearch();</script>
+{% endblock %}
