@@ -11,8 +11,10 @@ from django.db import transaction
 from django.db.models import Prefetch, Q
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.decorators.http import require_POST
 
 from .file_utils import (
@@ -27,6 +29,7 @@ from .file_utils import (
 from .forms import CatalogObjectForm
 from .models import CatalogObject, ObjectIdSequence, PdfAttachment, PhotoAttachment
 from .permissions import catalog_admin_required
+from .printing import build_print_pages, fetch_objects_for_print, render_cards_pdf
 from .services import (
     delete_pdf,
     delete_photo,
@@ -375,3 +378,105 @@ def qr_search(request):
             return render(request, 'catalog/qr_search.html')
         return redirect('catalog:object_detail', code=code)
     return render(request, 'catalog/qr_search.html')
+
+
+def _parse_print_codes(raw) -> list[str]:
+    if isinstance(raw, str):
+        parts = [p.strip() for p in raw.split(',') if p.strip()]
+    else:
+        parts = [str(item).strip() for item in raw if str(item).strip()]
+
+    codes: list[str] = []
+    for part in parts:
+        code = part if re.fullmatch(r'\d{4}', part) else parse_object_code(part)
+        if code and code not in codes:
+            codes.append(code)
+    return codes
+
+
+def _pdf_response(pdf_bytes: bytes, filename: str, *, inline: bool) -> HttpResponse:
+    disposition = 'inline' if inline else 'attachment'
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    response['Content-Disposition'] = f'{disposition}; filename="{filename}"'
+    return response
+
+
+@login_required
+def object_print_preview(request, code: str):
+    if not _active_queryset().filter(code=code).exists():
+        raise Http404()
+    return render(
+        request,
+        'catalog/print_preview.html',
+        {
+            'codes': [code],
+            'page_count': 1,
+            'pdf_inline_url': reverse('catalog:object_print_pdf', args=[code]) + '?inline=1',
+            'pdf_download_url': reverse('catalog:object_print_pdf', args=[code]),
+        },
+    )
+
+
+@xframe_options_sameorigin
+@login_required
+def object_print_pdf(request, code: str):
+    obj = get_object_or_404(_active_queryset().prefetch_related('photos'), code=code)
+    try:
+        pdf_bytes = render_cards_pdf(build_print_pages([obj]))
+    except Exception:
+        logger.exception('print pdf failed for %s', code)
+        raise Http404() from None
+    inline = request.GET.get('inline') == '1'
+    return _pdf_response(pdf_bytes, f'keepix_{code}.pdf', inline=inline)
+
+
+@login_required
+def bulk_print_submit(request):
+    if request.method != 'POST':
+        return redirect('catalog:object_list')
+    codes = _parse_print_codes(request.POST.getlist('codes'))
+    if not codes:
+        messages.error(request, 'Выберите хотя бы один объект для печати.')
+        return redirect('catalog:object_list')
+    return redirect(f'{reverse("catalog:print_bulk_preview")}?codes={",".join(codes)}')
+
+
+@login_required
+def print_bulk_preview(request):
+    codes = _parse_print_codes(request.GET.get('codes', ''))
+    objects = list(fetch_objects_for_print(codes))
+    if not objects:
+        messages.error(request, 'Объекты для печати не найдены.')
+        return redirect('catalog:object_list')
+    codes = [obj.code for obj in objects]
+    codes_param = ','.join(codes)
+    return render(
+        request,
+        'catalog/print_preview.html',
+        {
+            'codes': codes,
+            'page_count': len(codes),
+            'pdf_inline_url': f'{reverse("catalog:print_bulk_pdf")}?codes={codes_param}&inline=1',
+            'pdf_download_url': f'{reverse("catalog:print_bulk_pdf")}?codes={codes_param}',
+        },
+    )
+
+
+@xframe_options_sameorigin
+@login_required
+def print_bulk_pdf(request):
+    codes = _parse_print_codes(request.GET.get('codes', ''))
+    objects = list(fetch_objects_for_print(codes))
+    if not objects:
+        raise Http404()
+    try:
+        pdf_bytes = render_cards_pdf(build_print_pages(objects))
+    except Exception:
+        logger.exception('bulk print pdf failed')
+        raise Http404() from None
+    inline = request.GET.get('inline') == '1'
+    if len(objects) == 1:
+        filename = f'keepix_{objects[0].code}.pdf'
+    else:
+        filename = f'keepix_print_{len(objects)}.pdf'
+    return _pdf_response(pdf_bytes, filename, inline=inline)

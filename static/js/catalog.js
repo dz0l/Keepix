@@ -138,8 +138,21 @@ const KeepixCatalog = (function () {
     });
   }
 
+  function initBulkPrint() {
+    const selectAll = document.getElementById('select-all-objects');
+    const checkboxes = document.querySelectorAll('.obj-select');
+    if (!selectAll || !checkboxes.length) return;
+
+    selectAll.addEventListener('change', () => {
+      checkboxes.forEach((cb) => {
+        cb.checked = selectAll.checked;
+      });
+    });
+  }
+
   return {
     initPhotoSortable,
     initQrSearch,
+    initBulkPrint,
   };
 })();

@@ -30,7 +30,7 @@ RUN pip install --upgrade pip && pip install -r /app/requirements.txt
 COPY . /app
 
 RUN groupadd --system app && useradd --system --gid app --create-home app \
-    && mkdir -p /app/media/objects /app/staticfiles /app/backups/db_auto \
+    && mkdir -p /app/media/objects /app/staticfiles /app/backups/db_auto /app/backups/full \
     && chown -R app:app /app /home/app
 
 RUN chmod +x /app/docker/entrypoint.sh

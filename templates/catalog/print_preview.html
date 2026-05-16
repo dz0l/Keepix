@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Печать — Keepix{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <a class="back-link" href="{% url 'catalog:object_list' %}">← Каталог</a>
+    <h1>Предпросмотр печати</h1>
+  </div>
+  <div class="page-actions">
+    <a class="btn-secondary" href="{{ pdf_download_url }}">Скачать PDF</a>
+  </div>
+</section>
+
+<p class="muted">
+  {% if codes|length == 1 %}
+  Объект {{ codes.0 }} — {{ page_count }} стр.
+  {% else %}
+  Выбрано объектов: {{ codes|length }} — {{ page_count }} стр.
+  {% endif %}
+</p>
+
+<div class="card print-preview-frame">
+  <iframe src="{{ pdf_inline_url }}" title="Предпросмотр PDF"></iframe>
+</div>
+{% endblock %}

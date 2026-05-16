@@ -12,7 +12,7 @@ from django.utils import timezone
 class Command(BaseCommand):
     help = (
         'Автобекап только БД в BACKUP_DB_ROOT, хранить последние BACKUP_DB_KEEP_LAST файлов. '
-        'Полный архив с медиа — отдельная команда (будет добавлена).'
+        'Полный архив БД+media — команда backup_full.'
     )
 
     def handle(self, *args, **options):

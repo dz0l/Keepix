@@ -1,0 +1,95 @@
+@page {
+  size: A4 portrait;
+  margin: 14mm 16mm;
+}
+
+body {
+  font-family: 'DejaVu Sans', sans-serif;
+  font-size: 11pt;
+  color: #111;
+  margin: 0;
+}
+
+.print-page {
+  page-break-after: always;
+}
+
+.print-page:last-child {
+  page-break-after: auto;
+}
+
+.print-header {
+  margin-bottom: 6mm;
+  border-bottom: 0.4mm solid #ccc;
+  padding-bottom: 3mm;
+}
+
+.print-id {
+  margin: 0 0 2mm;
+  font-size: 20pt;
+  letter-spacing: 0.05em;
+}
+
+.print-label {
+  font-weight: 700;
+  color: #333;
+}
+
+.print-field {
+  margin: 0 0 2mm;
+}
+
+.print-body {
+  margin: 0 0 4mm;
+  white-space: pre-wrap;
+}
+
+.photo-grid-area {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  gap: 5mm;
+  min-height: 110mm;
+  margin-top: 4mm;
+}
+
+.photo-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.photo-grid-area img {
+  object-fit: contain;
+  display: block;
+}
+
+.photos-1 .photo-slot {
+  width: 100%;
+}
+
+.photos-1 img {
+  max-width: 170mm;
+  max-height: 95mm;
+}
+
+.photos-row .photo-slot {
+  flex: 0 1 auto;
+}
+
+.photos-row img {
+  max-width: 58mm;
+  max-height: 72mm;
+}
+
+.photos-grid .photo-slot {
+  flex: 0 1 calc(50% - 5mm);
+  max-width: calc(50% - 5mm);
+}
+
+.photos-grid img {
+  max-width: 82mm;
+  max-height: 52mm;
+}

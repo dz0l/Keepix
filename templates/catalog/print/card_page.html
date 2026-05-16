@@ -1,0 +1,21 @@
+<section class="print-page">
+  <header class="print-header">
+    <h1 class="print-id">{{ obj.code }}</h1>
+    <p class="print-field"><span class="print-label">От</span> {{ obj.sender }}</p>
+  </header>
+
+  <div class="print-text">
+    <p class="print-field"><span class="print-label">Описание</span></p>
+    <p class="print-body">{{ obj.description|default:"—" }}</p>
+    <p class="print-field"><span class="print-label">Комментарий</span></p>
+    <p class="print-body">{{ obj.comment|default:"—" }}</p>
+  </div>
+
+  {% if photo_uris %}
+  <div class="photo-grid-area {{ layout_class }}">
+    {% for uri in photo_uris %}
+    <div class="photo-slot"><img src="{{ uri }}" alt=""></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>

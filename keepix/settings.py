@@ -139,6 +139,7 @@ LOGIN_LOCK_MINUTES = int(os.environ.get('LOGIN_LOCK_MINUTES', '30'))
 
 BACKUP_DB_KEEP_LAST = int(os.environ.get('BACKUP_DB_KEEP_LAST', '3'))
 BACKUP_DB_ROOT = Path(os.environ.get('BACKUP_DB_ROOT', str(BASE_DIR / 'backups' / 'db_auto')))
+BACKUP_FULL_ROOT = Path(os.environ.get('BACKUP_FULL_ROOT', str(BASE_DIR / 'backups' / 'full')))
 
 MAX_PHOTOS_PER_ITEM = 6
 MAX_PDFS_PER_ITEM = 2

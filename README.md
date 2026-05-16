@@ -91,6 +91,7 @@ docker compose exec -it app python manage.py ...
 | `list_deleted` | Prints deleted catalogue records to stdout (not exposed in UI). |
 | `scan` | Prints CPU/memory/disk overview for operators via SSH. |
 | `backup_db_auto` | Gzipped `pg_dump` into `BACKUP_DB_ROOT`; keeps the newest `BACKUP_DB_KEEP_LAST` files. |
+| `backup_full` | Single `.tar.gz` with gzipped SQL dump and the whole `media/` tree (written to `BACKUP_FULL_ROOT` by default). Optional `--output /path/archive.tar.gz`. |
 
 ---
 
@@ -102,7 +103,7 @@ Adjust path as needed:
 30 3 */10 * * root cd /opt/keepix && docker compose exec -T app python manage.py backup_db_auto >> /var/log/keepix_backup.log 2>&1
 ```
 
-A single `.tar.gz` containing both media and DB is planned as a dedicated command later.
+Run `backup_full` before major upgrades or when copying the server off-site. Restore: extract the archive, restore `media/`, then import `database.sql.gz` into PostgreSQL.
 
 ---
 

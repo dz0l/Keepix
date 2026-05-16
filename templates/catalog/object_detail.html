@@ -6,12 +6,13 @@
     <a class="back-link" href="{% url 'catalog:object_list' %}">← Каталог</a>
     <h1>Объект {{ obj.code }}</h1>
   </div>
-  {% if is_admin %}
   <div class="page-actions">
+    <a class="btn-secondary" href="{% url 'catalog:object_print_preview' obj.code %}">Печать</a>
+    {% if is_admin %}
     <a class="btn-secondary" href="{% url 'catalog:object_edit' obj.code %}">Изменить</a>
     <a class="btn-danger" href="{% url 'catalog:object_delete' obj.code %}">Удалить</a>
+    {% endif %}
   </div>
-  {% endif %}
 </section>
 
 <div class="card detail-grid">
