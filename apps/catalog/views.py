@@ -20,7 +20,9 @@ from django.views.decorators.http import require_POST
 from .file_utils import (
     delete_paths,
     delete_photo_files,
+    next_pdf_slot,
     next_photo_slot,
+    next_photo_sort_order,
     parse_object_code,
     save_pdf,
     save_photo,
@@ -119,8 +121,8 @@ def _check_version(obj: CatalogObject, posted: str) -> bool:
 def _attach_uploaded_files(obj: CatalogObject, form: CatalogObjectForm) -> list[str]:
     saved_paths: list[str] = []
     for photo_file in form.cleaned_data.get('photos') or []:
-        slot = next_photo_slot(obj)
-        rel, rel_preview, size = save_photo(obj.code, photo_file, slot)
+        file_slot = next_photo_slot(obj)
+        rel, rel_preview, size = save_photo(obj.code, photo_file, file_slot)
         saved_paths.extend([rel, rel_preview])
         is_first = not obj.photos.exists()
         PhotoAttachment.objects.create(
@@ -128,16 +130,14 @@ def _attach_uploaded_files(obj: CatalogObject, form: CatalogObjectForm) -> list[
             path_original=rel,
             path_preview=rel_preview,
             original_name=photo_file.name,
-            sort_order=slot,
+            sort_order=next_photo_sort_order(obj),
             is_primary=is_first,
             size=size,
         )
 
-    pdf_count = obj.pdfs.count()
     for pdf_file in form.cleaned_data.get('pdfs') or []:
-        slot = pdf_count + 1
-        pdf_count += 1
-        rel, size = save_pdf(obj.code, pdf_file, slot)
+        file_slot = next_pdf_slot(obj)
+        rel, size = save_pdf(obj.code, pdf_file, file_slot)
         saved_paths.append(rel)
         PdfAttachment.objects.create(
             catalog_object=obj,

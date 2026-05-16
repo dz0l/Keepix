@@ -21,6 +21,7 @@ from .models import CatalogObject, PhotoAttachment
 PHOTO_INPUT_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif', '.tiff', '.tif'}
 STORE_FORMAT = 'JPEG'
 STORE_EXT = '.jpg'
+_FILE_SLOT_RE = re.compile(r'_(\d{2})$')
 
 
 def _media_root(code: str) -> Path:
@@ -58,7 +59,53 @@ def parse_object_code(raw: str) -> str | None:
     return None
 
 
+def _slot_from_stem(code: str, stem: str) -> int | None:
+    if not stem.startswith(f'{code}_'):
+        return None
+    match = _FILE_SLOT_RE.search(stem)
+    if not match:
+        return None
+    return int(match.group(1))
+
+
+def _max_existing_file_slot(code: str, subdir: str, extension: str) -> int:
+    max_slot = 0
+    base = _media_root(code) / subdir
+    if base.is_dir():
+        for path in base.glob(f'{code}_*{extension}'):
+            stem = path.stem
+            if stem.startswith('preview_'):
+                stem = stem.removeprefix('preview_')
+            slot = _slot_from_stem(code, stem)
+            if slot is not None:
+                max_slot = max(max_slot, slot)
+    return max_slot
+
+
 def next_photo_slot(obj) -> int:
+    """Следующий свободный номер файла (не sort_order — он может быть 0 после удаления фото)."""
+    code = obj.code
+    max_slot = _max_existing_file_slot(code, 'photos', STORE_EXT)
+    for path in obj.photos.values_list('path_original', flat=True):
+        stem = Path(path).stem
+        slot = _slot_from_stem(code, stem)
+        if slot is not None:
+            max_slot = max(max_slot, slot)
+    return max_slot + 1
+
+
+def next_pdf_slot(obj) -> int:
+    code = obj.code
+    max_slot = _max_existing_file_slot(code, 'pdf', '.pdf')
+    for path in obj.pdfs.values_list('path', flat=True):
+        stem = Path(path).stem
+        slot = _slot_from_stem(code, stem)
+        if slot is not None:
+            max_slot = max(max_slot, slot)
+    return max_slot + 1
+
+
+def next_photo_sort_order(obj) -> int:
     last = obj.photos.order_by('-sort_order').values_list('sort_order', flat=True).first()
     return (last or 0) + 1
 

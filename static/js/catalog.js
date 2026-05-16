@@ -89,11 +89,15 @@ const KeepixCatalog = (function () {
     syncOrder();
   }
 
-  function addFiles(input, files) {
+  function setFiles(input, files) {
     const dt = new DataTransfer();
-    Array.from(input.files).forEach((file) => dt.items.add(file));
     Array.from(files).forEach((file) => dt.items.add(file));
     input.files = dt.files;
+  }
+
+  function addFiles(input, files) {
+    const merged = [...Array.from(input.files), ...Array.from(files)];
+    setFiles(input, merged);
   }
 
   function renderDropzoneList(input) {
@@ -113,6 +117,15 @@ const KeepixCatalog = (function () {
   }
 
   function initFileDropzones() {
+    const objectForm = document.getElementById('object-form');
+    if (objectForm) {
+      objectForm.addEventListener('submit', () => {
+        objectForm.querySelectorAll('input[type="file"]').forEach((input) => {
+          input.value = '';
+        });
+      });
+    }
+
     document.querySelectorAll('[data-dropzone-for]').forEach((zone) => {
       const inputId = zone.getAttribute('data-dropzone-for');
       const input = document.getElementById(inputId);
@@ -141,7 +154,10 @@ const KeepixCatalog = (function () {
         renderDropzoneList(input);
       });
 
-      input.addEventListener('change', () => renderDropzoneList(input));
+      input.addEventListener('change', () => {
+        setFiles(input, input.files);
+        renderDropzoneList(input);
+      });
 
       const trigger = zone.querySelector('.dropzone-trigger');
       if (trigger) {
