@@ -15,24 +15,10 @@ const KeepixCatalog = (function () {
       if (num >= 1 && num <= 9999) return String(num).padStart(4, '0');
     }
 
-    const idMatch = text.match(/(?:^|\n)\s*ID\s*:\s*(\d{1,4})\s*(?:$|\n)/i);
-    if (idMatch) {
-      const num = parseInt(idMatch[1], 10);
-      if (num >= 1 && num <= 9999) return String(num).padStart(4, '0');
-    }
-
     const compact = text.replace(/\s+/g, '');
     if (/^\d{1,4}$/.test(compact)) {
       const num = parseInt(compact, 10);
       if (num >= 1 && num <= 9999) return String(num).padStart(4, '0');
-    }
-
-    if (text.length <= 16 && !/\d+\.\d+/.test(text)) {
-      const match = text.match(/\b(\d{1,4})\b/);
-      if (match) {
-        const num = parseInt(match[1], 10);
-        if (num >= 1 && num <= 9999) return String(num).padStart(4, '0');
-      }
     }
 
     return '';
@@ -103,8 +89,9 @@ const KeepixCatalog = (function () {
     syncOrder();
   }
 
-  function assignFiles(input, files) {
+  function addFiles(input, files) {
     const dt = new DataTransfer();
+    Array.from(input.files).forEach((file) => dt.items.add(file));
     Array.from(files).forEach((file) => dt.items.add(file));
     input.files = dt.files;
   }
@@ -150,11 +137,19 @@ const KeepixCatalog = (function () {
       zone.addEventListener('drop', (e) => {
         const dropped = e.dataTransfer?.files;
         if (!dropped?.length) return;
-        assignFiles(input, dropped);
+        addFiles(input, dropped);
         renderDropzoneList(input);
       });
 
       input.addEventListener('change', () => renderDropzoneList(input));
+
+      const trigger = zone.querySelector('.dropzone-trigger');
+      if (trigger) {
+        trigger.addEventListener('click', (e) => {
+          e.preventDefault();
+          input.click();
+        });
+      }
     });
   }
 

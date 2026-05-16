@@ -44,6 +44,14 @@ logger = logging.getLogger('keepix.catalog')
 
 PER_PAGE = 20
 
+SORT_FIELDS = {
+    'code': 'code',
+    'sender': 'sender',
+    'obj_type': 'obj_type',
+    'description': 'description',
+    'placement': 'placement',
+}
+
 
 def _active_queryset():
     return CatalogObject.objects.filter(status=CatalogObject.Status.ACTIVE)
@@ -71,6 +79,30 @@ def _apply_search(qs, query: str):
         code_filter = Q(code=query)
 
     return qs.filter(text_filter | code_filter).distinct()
+
+
+def _apply_sort(qs, sort: str, order: str):
+    if sort not in SORT_FIELDS:
+        return qs.order_by('-updated_at', 'code')
+    field = SORT_FIELDS[sort]
+    descending = order == 'desc'
+    primary = f'-{field}' if descending else field
+    return qs.order_by(primary, 'code')
+
+
+def _build_sort_urls(request, sort: str, order: str) -> dict[str, str]:
+    base = request.GET.copy()
+    base.pop('page', None)
+    urls: dict[str, str] = {}
+    for field in SORT_FIELDS:
+        params = base.copy()
+        params['sort'] = field
+        if sort == field and order == 'asc':
+            params['order'] = 'desc'
+        else:
+            params['order'] = 'asc'
+        urls[field] = params.urlencode()
+    return urls
 
 
 def _check_version(obj: CatalogObject, posted: str) -> bool:
@@ -142,7 +174,6 @@ def object_list(request):
                 queryset=PhotoAttachment.objects.order_by('sort_order', 'pk'),
             )
         )
-        .order_by('-updated_at', 'code')
     )
 
     q = request.GET.get('q', '')
@@ -152,9 +183,11 @@ def object_list(request):
     if obj_type and obj_type in dict(CatalogObject.ObjectType.choices):
         qs = qs.filter(obj_type=obj_type)
 
-    condition = request.GET.get('condition', '')
-    if condition and condition in dict(CatalogObject.Condition.choices):
-        qs = qs.filter(condition=condition)
+    sort = request.GET.get('sort', '')
+    order = request.GET.get('order', 'asc')
+    if order not in {'asc', 'desc'}:
+        order = 'asc'
+    qs = _apply_sort(qs, sort, order)
 
     paginator = Paginator(qs, PER_PAGE)
     page = paginator.get_page(request.GET.get('page'))
@@ -169,9 +202,10 @@ def object_list(request):
             'page': page,
             'q': q,
             'obj_type': obj_type,
-            'condition': condition,
+            'sort': sort,
+            'order': order,
+            'sort_urls': _build_sort_urls(request, sort, order),
             'type_choices': CatalogObject.ObjectType.choices,
-            'condition_choices': CatalogObject.Condition.choices,
             'query_string': query_params.urlencode(),
             'is_admin': request.user.is_catalog_admin(),
         },

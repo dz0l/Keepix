@@ -4,7 +4,6 @@ import re
 from pathlib import Path
 
 from django.conf import settings
-from django.utils import timezone
 
 from keepix.public_url import build_object_public_url
 from PIL import Image, UnidentifiedImageError
@@ -39,6 +38,7 @@ def _save_stream(uploaded_file, destination: Path) -> None:
 
 
 def parse_object_code(raw: str) -> str | None:
+    """ID из URL объекта (/objects/0001/) или из строки только с цифрами ID."""
     raw = (raw or '').strip()
     if not raw:
         return None
@@ -49,51 +49,13 @@ def parse_object_code(raw: str) -> str | None:
         if 1 <= num <= 9999:
             return f'{num:04d}'
 
-    id_match = re.search(r'(?:^|\n)\s*ID\s*:\s*(\d{1,4})\s*(?:$|\n)', raw, re.I)
-    if id_match:
-        num = int(id_match.group(1))
-        if 1 <= num <= 9999:
-            return f'{num:04d}'
-
     compact = re.sub(r'\s+', '', raw)
     if re.fullmatch(r'\d{1,4}', compact):
         num = int(compact)
         if 1 <= num <= 9999:
             return f'{num:04d}'
 
-    if len(raw) <= 16 and not re.search(r'\d+\.\d+', raw):
-        match = re.search(r'\b(\d{1,4})\b', raw)
-        if match:
-            num = int(match.group(1))
-            if 1 <= num <= 9999:
-                return f'{num:04d}'
-
     return None
-
-
-def build_qr_payload(obj: CatalogObject) -> str:
-    if obj.condition != CatalogObject.Condition.ACTIVE:
-        condition_label = obj.get_condition_display()
-    else:
-        condition_label = 'Норма'
-
-    created = timezone.localtime(obj.created_at).strftime('%d.%m.%Y %H:%M')
-    updated = timezone.localtime(obj.updated_at).strftime('%d.%m.%Y %H:%M')
-    url = build_object_public_url(obj.code)
-
-    lines = [
-        f'ID: {obj.code}',
-        f'От: {obj.sender or "—"}',
-        f'Тип: {obj.get_obj_type_display()}',
-        f'Состояние: {condition_label}',
-        f'Описание: {obj.description or "—"}',
-        f'Комментарий: {obj.comment or "—"}',
-        f'Размещение: {obj.placement or "—"}',
-        f'Добавлен: {created}',
-        f'Изменён: {updated}',
-        f'URL: {url}',
-    ]
-    return '\n'.join(lines)
 
 
 def next_photo_slot(obj) -> int:
@@ -173,9 +135,9 @@ def save_qr_png(obj: CatalogObject) -> str:
     _ensure_dir(base_dir)
     file_path = base_dir / f'{code}.png'
 
-    payload = build_qr_payload(obj)
-    qr = qrcode.QRCode(version=None, box_size=6, border=2)
-    qr.add_data(payload)
+    url = build_object_public_url(obj.code)
+    qr = qrcode.QRCode(version=None, box_size=8, border=2)
+    qr.add_data(url)
     qr.make(fit=True)
     image = qr.make_image(fill_color='black', back_color='white')
     image.save(file_path, format='PNG')

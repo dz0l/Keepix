@@ -66,9 +66,8 @@
       {% endif %}
 
       <div class="dropzone" data-dropzone-for="{{ form.photos.id_for_label }}">
-        <span class="label-text">{{ form.photos.label }}</span>
-        <p class="dropzone-hint">Перетащите файлы сюда</p>
         {{ form.photos }}
+        <button type="button" class="dropzone-trigger">{{ form.photos.label }}</button>
         <ul class="dropzone-files" data-dropzone-list="{{ form.photos.id_for_label }}" hidden></ul>
         {% if form.photos.errors %}<span class="field-error">{{ form.photos.errors.0 }}</span>{% endif %}
       </div>
@@ -87,9 +86,8 @@
       {% endif %}
 
       <div class="dropzone" data-dropzone-for="{{ form.pdfs.id_for_label }}">
-        <span class="label-text">{{ form.pdfs.label }}</span>
-        <p class="dropzone-hint">Перетащите файлы сюда</p>
         {{ form.pdfs }}
+        <button type="button" class="dropzone-trigger">{{ form.pdfs.label }}</button>
         <ul class="dropzone-files" data-dropzone-list="{{ form.pdfs.id_for_label }}" hidden></ul>
         {% if form.pdfs.errors %}<span class="field-error">{{ form.pdfs.errors.0 }}</span>{% endif %}
       </div>

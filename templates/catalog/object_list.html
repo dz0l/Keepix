@@ -14,6 +14,8 @@
 </section>
 
 <form class="filters" method="get" action="{% url 'catalog:object_list' %}" id="catalog-filter-form">
+  {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+  {% if order %}<input type="hidden" name="order" value="{{ order }}">{% endif %}
   <input
     type="search"
     name="q"
@@ -43,11 +45,21 @@
               <span>Все</span>
             </label>
           </th>
-          <th>ID</th>
-          <th>От</th>
-          <th>Тип</th>
-          <th>Размещение</th>
-          <th>Состояние</th>
+          <th>
+            <a href="?{{ sort_urls.code }}" class="th-sort{% if sort == 'code' %} is-active order-{{ order }}{% endif %}">ID</a>
+          </th>
+          <th>
+            <a href="?{{ sort_urls.sender }}" class="th-sort{% if sort == 'sender' %} is-active order-{{ order }}{% endif %}">От</a>
+          </th>
+          <th>
+            <a href="?{{ sort_urls.obj_type }}" class="th-sort{% if sort == 'obj_type' %} is-active order-{{ order }}{% endif %}">Тип</a>
+          </th>
+          <th>
+            <a href="?{{ sort_urls.description }}" class="th-sort{% if sort == 'description' %} is-active order-{{ order }}{% endif %}">Описание</a>
+          </th>
+          <th>
+            <a href="?{{ sort_urls.placement }}" class="th-sort{% if sort == 'placement' %} is-active order-{{ order }}{% endif %}">Размещение</a>
+          </th>
           <th class="col-thumb"></th>
         </tr>
       </thead>
@@ -60,14 +72,8 @@
           <td><a href="{% url 'catalog:object_detail' obj.code %}">{{ obj.code }}</a></td>
           <td>{{ obj.sender|truncatechars:40 }}</td>
           <td>{{ obj.get_obj_type_display }}</td>
+          <td>{{ obj.description|truncatechars:50 }}</td>
           <td>{{ obj.placement|truncatechars:50 }}</td>
-          <td>
-            {% if obj.condition != 'active' %}
-            <span class="badge badge-{{ obj.condition }}">{{ obj.get_condition_display }}</span>
-            {% else %}
-            <span class="badge badge-muted">—</span>
-            {% endif %}
-          </td>
           <td class="col-thumb">
             {% for photo in obj.photos.all %}
             {% if forloop.first %}
