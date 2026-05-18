@@ -78,7 +78,7 @@
             {% for photo in obj.photos.all %}
             {% if forloop.first %}
             <a href="{% url 'catalog:object_detail' obj.code %}">
-              <img class="list-thumb" src="{% url 'core:media_accel' photo.path_preview %}" alt="">
+              <img class="list-thumb" src="{% url 'core:media_accel' photo.path_preview %}?v={{ photo.pk }}" alt="">
             </a>
             {% endif %}
             {% endfor %}

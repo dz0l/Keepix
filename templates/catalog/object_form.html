@@ -58,7 +58,7 @@
         <ul class="photo-grid" id="photo-sortable">
           {% for photo in photos %}
           <li class="photo-tile" data-photo-id="{{ photo.pk }}" draggable="true">
-            <img src="{% url 'core:media_accel' photo.path_preview %}" alt="">
+            <img src="{% url 'core:media_accel' photo.path_preview %}?v={{ photo.pk }}" alt="">
           </li>
           {% endfor %}
         </ul>

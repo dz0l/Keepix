@@ -71,13 +71,18 @@ def accel_media(request, rel_path: str):
     if not full.is_file():
         raise Http404()
 
+    cache_control = 'private, max-age=0, must-revalidate'
+
     if not getattr(settings, 'USE_X_ACCEL', True):
-        return FileResponse(full.open('rb'), filename=full.name)
+        response = FileResponse(full.open('rb'), filename=full.name)
+        response['Cache-Control'] = cache_control
+        return response
 
     response = HttpResponse()
     internal = settings.INTERNAL_MEDIA_LOCATION.rstrip('/') + '/' + rel
     response['X-Accel-Redirect'] = internal
     response['Content-Type'] = ''
+    response['Cache-Control'] = cache_control
     return response
 
 

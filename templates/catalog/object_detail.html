@@ -41,10 +41,10 @@
       <button
         type="button"
         class="photo-lightbox-open"
-        data-lightbox-src="{% url 'core:media_accel' photo.path_original %}"
+        data-lightbox-src="{% url 'core:media_accel' photo.path_original %}?v={{ photo.pk }}"
         aria-label="Увеличить фото {{ forloop.counter }}"
       >
-        <img src="{% url 'core:media_accel' photo.path_preview %}" alt="">
+        <img src="{% url 'core:media_accel' photo.path_preview %}?v={{ photo.pk }}" alt="">
       </button>
     </li>
     {% endfor %}

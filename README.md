@@ -92,6 +92,7 @@ docker compose exec -it app python manage.py ...
 | `scan` | Prints CPU/memory/disk overview for operators via SSH. |
 | `backup_db_auto` | Gzipped `pg_dump` into `BACKUP_DB_ROOT`; keeps the newest `BACKUP_DB_KEEP_LAST` files. |
 | `backup_full` | Single `.tar.gz` with gzipped SQL dump and the whole `media/` tree (written to `BACKUP_FULL_ROOT` by default). Optional `--output /path/archive.tar.gz`. |
+| `regenerate_qr` | Recreate QR PNG files for active objects after changing `KEEPIX_PUBLIC_BASE_URL`. Optional `--code 0042`. |
 
 ---
 
