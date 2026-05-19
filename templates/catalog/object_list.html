@@ -17,6 +17,7 @@
   {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
   {% if order %}<input type="hidden" name="order" value="{{ order }}">{% endif %}
   <input type="hidden" name="per_page" value="{{ per_page }}">
+  {% if show_hidden %}<input type="hidden" name="show_hidden" value="1">{% endif %}
   <input
     type="search"
     name="q"

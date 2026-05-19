@@ -140,6 +140,20 @@ body.modal-open { overflow: hidden; }
   border-color: var(--accent);
 }
 
+.btn-icon.is-active {
+  background: #e8f4fc;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+#show-hidden-btn:not(.is-active) .icon-eye-open {
+  display: none;
+}
+
+#show-hidden-btn.is-active .icon-eye-off {
+  display: none;
+}
+
 .btn-icon .icon {
   width: 1.35rem;
   height: 1.35rem;
@@ -778,6 +792,7 @@ textarea.input {
 [data-theme="dark"] .data-table tbody tr:hover { background: #1a2129; }
 [data-theme="dark"] .btn-secondary:hover,
 [data-theme="dark"] .btn-icon:hover { background: #232b35; }
+[data-theme="dark"] .btn-icon.is-active { background: #1e3a4f; border-color: var(--accent); }
 [data-theme="dark"] .modal-backdrop { background: rgba(0, 0, 0, 0.65); }
 [data-theme="dark"] .photo-tile { background: #151a21; }
 

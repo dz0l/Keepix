@@ -4,6 +4,7 @@ const KeepixCatalog = (function () {
 
   const THEME_KEY = 'keepix-theme';
   const THEME_CYCLE = ['dark', 'light', 'system'];
+  const SHOW_HIDDEN_KEY = 'keepix-show-hidden';
 
   function parseCode(raw) {
     const text = String(raw || '').trim();
@@ -47,6 +48,56 @@ const KeepixCatalog = (function () {
       const next = THEME_CYCLE[(idx + 1) % THEME_CYCLE.length];
       localStorage.setItem(THEME_KEY, next);
       applyTheme(next);
+    });
+  }
+
+  function isCatalogListPage() {
+    return Boolean(document.getElementById('catalog-filter-form'));
+  }
+
+  function applyShowHiddenButton(active) {
+    const btn = document.getElementById('show-hidden-btn');
+    if (!btn) return;
+    btn.classList.toggle('is-active', active);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    btn.title = active
+      ? 'Скрыть утерянные, сломанные и списанные'
+      : 'Показать скрытые';
+  }
+
+  function catalogListUrlWithShowHidden(want) {
+    const url = new URL(window.location.href);
+    if (want) url.searchParams.set('show_hidden', '1');
+    else url.searchParams.delete('show_hidden');
+    url.searchParams.delete('page');
+    return url.toString();
+  }
+
+  function syncShowHiddenOnCatalogList() {
+    if (!isCatalogListPage()) return;
+    const want = localStorage.getItem(SHOW_HIDDEN_KEY) === '1';
+    const url = new URL(window.location.href);
+    const has = url.searchParams.get('show_hidden') === '1';
+    if (want !== has) {
+      window.location.replace(catalogListUrlWithShowHidden(want));
+    }
+  }
+
+  function initShowHidden() {
+    const btn = document.getElementById('show-hidden-btn');
+    if (!btn) return;
+
+    let active = localStorage.getItem(SHOW_HIDDEN_KEY) === '1';
+    applyShowHiddenButton(active);
+    syncShowHiddenOnCatalogList();
+
+    btn.addEventListener('click', () => {
+      active = !active;
+      localStorage.setItem(SHOW_HIDDEN_KEY, active ? '1' : '0');
+      applyShowHiddenButton(active);
+      if (isCatalogListPage()) {
+        window.location.href = catalogListUrlWithShowHidden(active);
+      }
     });
   }
 
@@ -332,6 +383,7 @@ const KeepixCatalog = (function () {
 
   function initGlobal() {
     initTheme();
+    initShowHidden();
     initQrModal();
     initBulkPrint();
     initCatalogFilters();

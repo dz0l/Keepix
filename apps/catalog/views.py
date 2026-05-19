@@ -73,6 +73,32 @@ def _active_queryset():
     return CatalogObject.objects.filter(status=CatalogObject.Status.ACTIVE)
 
 
+def _normal_condition_only(qs):
+    return qs.filter(condition=CatalogObject.Condition.ACTIVE)
+
+
+def _show_hidden_requested(request) -> bool:
+    return (
+        request.user.is_authenticated
+        and request.user.is_catalog_admin()
+        and request.GET.get('show_hidden') == '1'
+    )
+
+
+def _list_queryset(request):
+    qs = _active_queryset()
+    if not _show_hidden_requested(request):
+        qs = _normal_condition_only(qs)
+    return qs
+
+
+def _object_access_queryset(user):
+    qs = _active_queryset()
+    if not user.is_catalog_admin():
+        qs = _normal_condition_only(qs)
+    return qs
+
+
 def _apply_search(qs, query: str):
     query = query.strip()
     if not query:
@@ -192,8 +218,9 @@ def _form_context(form, mode, obj=None):
 
 @login_required
 def object_list(request):
+    show_hidden = _show_hidden_requested(request)
     qs = (
-        _active_queryset()
+        _list_queryset(request)
         .prefetch_related(
             Prefetch(
                 'photos',
@@ -240,6 +267,7 @@ def object_list(request):
             'sort_urls': _build_sort_urls(request, sort, order),
             'type_choices': CatalogObject.ObjectType.choices,
             'query_string': query_params.urlencode(),
+            'show_hidden': show_hidden,
             'is_admin': request.user.is_catalog_admin(),
         },
     )
@@ -248,7 +276,7 @@ def object_list(request):
 @login_required
 def object_detail(request, code: str):
     obj = get_object_or_404(
-        _active_queryset().prefetch_related('photos', 'pdfs'),
+        _object_access_queryset(request.user).prefetch_related('photos', 'pdfs'),
         code=code,
     )
     placement_history = obj.placement_history.select_related('changed_by')[:20]
@@ -444,7 +472,7 @@ def qr_search(request):
         if not code:
             messages.error(request, 'Введите корректный ID объекта (до 4 цифр).')
             return render(request, 'catalog/qr_search.html')
-        if not _active_queryset().filter(code=code).exists():
+        if not _object_access_queryset(request.user).filter(code=code).exists():
             messages.error(request, f'Объект {code} не найден.')
             return render(request, 'catalog/qr_search.html')
         return redirect('catalog:object_detail', code=code)

@@ -21,6 +21,14 @@
       <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm12 2.5h1.5V13H15v2.5zm-3 0H13V13h-1.5v2.5zM15 19h1.5v-2.5H15V19zm3 0h1.5v-2.5H18V19zm-3-6H18V13h-1.5v2.5zM21 13h-1.5v2.5H21V13zm-6 6h1.5V19H15v-2.5z"/></svg>
     </button>
     <div class="topbar-right">
+      {% if is_catalog_admin %}
+      <button type="button" class="btn-icon" id="show-hidden-btn" aria-label="Показать скрытые" title="Показать скрытые" aria-pressed="false">
+        <svg class="icon icon-show-hidden" viewBox="0 0 24 24" aria-hidden="true">
+          <path class="icon-eye-open" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+          <path class="icon-eye-off" d="m3.27 3.27-1.27 1.27 2.89 2.89A11.82 11.82 0 0 0 1 12c1.73 4.39 6 7.5 11 7.5a11.65 11.65 0 0 0 4.58-.94l2.51 2.51 1.27-1.27L3.27 3.27zM12 17.5c-1.05 0-2.05-.22-2.97-.62l1.57-1.57c.45.12.93.19 1.4.19 2.76 0 5-2.24 5-5 0-.47-.07-.95-.19-1.4l1.57-1.57c.4.92.62 1.92.62 2.97 0 4.28-3.47 7.75-7.75 7.75z"/>
+        </svg>
+      </button>
+      {% endif %}
       <button type="button" class="btn-icon" id="theme-toggle-btn" aria-label="Тема" title="Тема оформления">
         <svg class="icon icon-theme" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9 4.5 4.5 0 0 1-5-5 4.5 4.5 0 0 1-4-4Z"/></svg>
       </button>
