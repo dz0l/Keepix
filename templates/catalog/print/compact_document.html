@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Печать Keepix — сводка</title>
+</head>
+<body>
+{% for sheet in sheets %}
+  {% include "catalog/print/compact_sheet.html" with items=sheet.items %}
+{% endfor %}
+</body>
+</html>

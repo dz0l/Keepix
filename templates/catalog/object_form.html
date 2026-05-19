@@ -38,6 +38,11 @@
         {{ form.placement }}
         {% if form.placement.errors %}<span class="field-error">{{ form.placement.errors.0 }}</span>{% endif %}
       </label>
+      <label>
+        <span class="label-text">{{ form.tags.label }}</span>
+        {{ form.tags }}
+        {% if form.tags.errors %}<span class="field-error">{{ form.tags.errors.0 }}</span>{% endif %}
+      </label>
     </div>
 
     <div class="form-col form-col-right">

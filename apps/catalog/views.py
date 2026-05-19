@@ -14,7 +14,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
-from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.decorators.http import require_POST
 
 from .file_utils import (
@@ -31,7 +30,13 @@ from .file_utils import (
 from .forms import CatalogObjectForm
 from .models import CatalogObject, ObjectIdSequence, PdfAttachment, PhotoAttachment
 from .permissions import catalog_admin_required
-from .printing import build_print_pages, fetch_objects_for_print, render_cards_pdf
+from .printing import (
+    build_compact_sheets,
+    build_print_pages,
+    fetch_objects_for_print,
+    render_cards_pdf,
+    render_compact_pdf,
+)
 from .services import (
     delete_pdf,
     delete_photo,
@@ -44,7 +49,16 @@ from .services import (
 
 logger = logging.getLogger('keepix.catalog')
 
-PER_PAGE = 20
+PER_PAGE_DEFAULT = 20
+PER_PAGE_OPTIONS = (20, 40, 60)
+
+
+def _parse_per_page(raw: str) -> int:
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        return PER_PAGE_DEFAULT
+    return value if value in PER_PAGE_OPTIONS else PER_PAGE_DEFAULT
 
 SORT_FIELDS = {
     'code': 'code',
@@ -69,6 +83,7 @@ def _apply_search(qs, query: str):
         | Q(description__icontains=query)
         | Q(comment__icontains=query)
         | Q(placement__icontains=query)
+        | Q(tags__icontains=query)
         | Q(obj_type__icontains=query)
     )
 
@@ -189,7 +204,8 @@ def object_list(request):
         order = 'asc'
     qs = _apply_sort(qs, sort, order)
 
-    paginator = Paginator(qs, PER_PAGE)
+    per_page = _parse_per_page(request.GET.get('per_page', ''))
+    paginator = Paginator(qs, per_page)
     page = paginator.get_page(request.GET.get('page'))
 
     query_params = request.GET.copy()
@@ -204,6 +220,8 @@ def object_list(request):
             'obj_type': obj_type,
             'sort': sort,
             'order': order,
+            'per_page': per_page,
+            'per_page_options': PER_PAGE_OPTIONS,
             'sort_urls': _build_sort_urls(request, sort, order),
             'type_choices': CatalogObject.ObjectType.choices,
             'query_string': query_params.urlencode(),
@@ -440,23 +458,6 @@ def _pdf_response(pdf_bytes: bytes, filename: str, *, inline: bool) -> HttpRespo
 
 
 @login_required
-def object_print_preview(request, code: str):
-    if not _active_queryset().filter(code=code).exists():
-        raise Http404()
-    return render(
-        request,
-        'catalog/print_preview.html',
-        {
-            'codes': [code],
-            'page_count': 1,
-            'pdf_inline_url': reverse('catalog:object_print_pdf', args=[code]) + '?inline=1',
-            'pdf_download_url': reverse('catalog:object_print_pdf', args=[code]),
-        },
-    )
-
-
-@xframe_options_sameorigin
-@login_required
 def object_print_pdf(request, code: str):
     obj = get_object_or_404(_active_queryset().prefetch_related('photos'), code=code)
     try:
@@ -464,8 +465,7 @@ def object_print_pdf(request, code: str):
     except Exception:
         logger.exception('print pdf failed for %s', code)
         raise Http404() from None
-    inline = request.GET.get('inline') == '1'
-    return _pdf_response(pdf_bytes, f'keepix_{code}.pdf', inline=inline)
+    return _pdf_response(pdf_bytes, f'keepix_{code}.pdf', inline=False)
 
 
 @login_required
@@ -476,45 +476,23 @@ def bulk_print_submit(request):
     if not codes:
         messages.error(request, 'Выберите хотя бы один объект для печати.')
         return redirect('catalog:object_list')
-    return redirect(f'{reverse("catalog:print_bulk_preview")}?codes={",".join(codes)}')
+    return redirect(f'{reverse("catalog:print_bulk_pdf")}?codes={",".join(codes)}')
 
 
-@login_required
-def print_bulk_preview(request):
-    codes = _parse_print_codes(request.GET.get('codes', ''))
-    objects = list(fetch_objects_for_print(codes))
-    if not objects:
-        messages.error(request, 'Объекты для печати не найдены.')
-        return redirect('catalog:object_list')
-    codes = [obj.code for obj in objects]
-    codes_param = ','.join(codes)
-    return render(
-        request,
-        'catalog/print_preview.html',
-        {
-            'codes': codes,
-            'page_count': len(codes),
-            'pdf_inline_url': f'{reverse("catalog:print_bulk_pdf")}?codes={codes_param}&inline=1',
-            'pdf_download_url': f'{reverse("catalog:print_bulk_pdf")}?codes={codes_param}',
-        },
-    )
-
-
-@xframe_options_sameorigin
 @login_required
 def print_bulk_pdf(request):
     codes = _parse_print_codes(request.GET.get('codes', ''))
     objects = list(fetch_objects_for_print(codes))
     if not objects:
-        raise Http404()
+        messages.error(request, 'Объекты для печати не найдены.')
+        return redirect('catalog:object_list')
     try:
-        pdf_bytes = render_cards_pdf(build_print_pages(objects))
+        pdf_bytes = render_compact_pdf(build_compact_sheets(objects))
     except Exception:
         logger.exception('bulk print pdf failed')
         raise Http404() from None
-    inline = request.GET.get('inline') == '1'
     if len(objects) == 1:
-        filename = f'keepix_{objects[0].code}.pdf'
+        filename = f'keepix_{objects[0].code}_list.pdf'
     else:
-        filename = f'keepix_print_{len(objects)}.pdf'
-    return _pdf_response(pdf_bytes, filename, inline=inline)
+        filename = f'keepix_list_{len(objects)}.pdf'
+    return _pdf_response(pdf_bytes, filename, inline=False)

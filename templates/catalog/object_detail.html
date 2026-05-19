@@ -4,7 +4,7 @@
 <section class="page-head">
   <h1>Объект {{ obj.code }}</h1>
   <div class="page-actions">
-    <a class="btn-secondary" href="{% url 'catalog:object_print_preview' obj.code %}">Печать</a>
+    <a class="btn-secondary" href="{% url 'catalog:object_print_pdf' obj.code %}">Печать</a>
     {% if is_admin %}
     <a class="btn-secondary" href="{% url 'catalog:object_edit' obj.code %}">Изменить</a>
     <a class="btn-danger" href="{% url 'catalog:object_delete' obj.code %}">Удалить</a>
@@ -27,6 +27,7 @@
     <dt>Описание</dt><dd class="pre-wrap">{{ obj.description|default:"—" }}</dd>
     <dt>Комментарий</dt><dd class="pre-wrap">{{ obj.comment|default:"—" }}</dd>
     <dt>Размещение</dt><dd class="pre-wrap">{{ obj.placement|default:"—" }}</dd>
+    <dt>Теги</dt><dd class="pre-wrap">{{ obj.tags|default:"—" }}</dd>
     <dt>Добавлен</dt><dd>{{ obj.created_at|date:"d.m.Y H:i" }}{% if obj.created_by %} — {{ obj.created_by.username }}{% endif %}</dd>
     <dt>Изменён</dt><dd>{{ obj.updated_at|date:"d.m.Y H:i" }}{% if obj.updated_by %} — {{ obj.updated_by.username }}{% endif %}</dd>
   </dl>

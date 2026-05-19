@@ -1,0 +1,75 @@
+@page {
+  size: A4 landscape;
+  margin: 10mm 12mm;
+}
+
+body {
+  font-family: 'DejaVu Sans', sans-serif;
+  font-size: 9pt;
+  color: #111;
+  margin: 0;
+}
+
+.compact-sheet {
+  page-break-after: always;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 186mm;
+}
+
+.compact-sheet:last-child {
+  page-break-after: auto;
+}
+
+.compact-row {
+  display: flex;
+  align-items: stretch;
+  gap: 6mm;
+  flex: 1 1 0;
+  min-height: 0;
+  padding: 2mm 0;
+  border-bottom: 0.25mm solid #ccc;
+}
+
+.compact-row:last-child {
+  border-bottom: none;
+}
+
+.compact-fields {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.compact-id {
+  margin: 0 0 1.5mm;
+  font-size: 13pt;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.compact-line {
+  margin: 0 0 1.2mm;
+  white-space: pre-wrap;
+  line-height: 1.25;
+}
+
+.compact-label {
+  font-weight: 700;
+  color: #333;
+}
+
+.compact-photo {
+  flex: 0 0 52mm;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.compact-photo img {
+  display: block;
+  object-fit: contain;
+  max-width: 52mm;
+  max-height: 52mm;
+}

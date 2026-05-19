@@ -6,7 +6,7 @@
 </head>
 <body>
 {% for page in pages %}
-  {% include "catalog/print/card_page.html" with obj=page.obj photo_uris=page.photo_uris layout_class=page.layout_class %}
+  {% include "catalog/print/card_page.html" with obj=page.obj primary_photo_uri=page.primary_photo_uri extra_photo_uris=page.extra_photo_uris %}
 {% endfor %}
 </body>
 </html>

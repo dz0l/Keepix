@@ -1,7 +1,7 @@
 <section class="print-page">
   <header class="print-header">
     <h1 class="print-id">{{ obj.code }}</h1>
-    <p class="print-field"><span class="print-label">От</span> {{ obj.sender }}</p>
+    <p class="print-field"><span class="print-label">От</span> {{ obj.sender|default:"—" }}</p>
   </header>
 
   <div class="print-text">
@@ -9,13 +9,24 @@
     <p class="print-body">{{ obj.description|default:"—" }}</p>
     <p class="print-field"><span class="print-label">Комментарий</span></p>
     <p class="print-body">{{ obj.comment|default:"—" }}</p>
+    <p class="print-field"><span class="print-label">Размещение</span></p>
+    <p class="print-body">{{ obj.placement|default:"—" }}</p>
   </div>
 
-  {% if photo_uris %}
-  <div class="photo-grid-area {{ layout_class }}">
-    {% for uri in photo_uris %}
-    <div class="photo-slot"><img src="{{ uri }}" alt=""></div>
-    {% endfor %}
+  {% if primary_photo_uri or extra_photo_uris %}
+  <div class="photo-area">
+    {% if primary_photo_uri %}
+    <div class="photo-primary">
+      <img src="{{ primary_photo_uri }}" alt="">
+    </div>
+    {% endif %}
+    {% if extra_photo_uris %}
+    <div class="photo-extras">
+      {% for uri in extra_photo_uris %}
+      <div class="photo-extra-slot"><img src="{{ uri }}" alt=""></div>
+      {% endfor %}
+    </div>
+    {% endif %}
   </div>
   {% endif %}
 </section>

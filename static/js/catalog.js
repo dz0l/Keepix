@@ -267,8 +267,10 @@ const KeepixCatalog = (function () {
 
     const search = form.querySelector('.filter-search');
     const typeSelect = form.querySelector('.filter-type');
+    const perPageSelect = form.querySelector('.filter-per-page-select');
 
     if (typeSelect) typeSelect.addEventListener('change', () => form.submit());
+    if (perPageSelect) perPageSelect.addEventListener('change', () => form.submit());
 
     if (search) {
       search.addEventListener('keydown', (e) => {

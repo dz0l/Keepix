@@ -30,6 +30,14 @@
     <option value="{{ value }}" {% if obj_type == value %}selected{% endif %}>{{ label }}</option>
     {% endfor %}
   </select>
+  <label class="filter-per-page">
+    <span class="label-text">На странице</span>
+    <select name="per_page" class="input filter-per-page-select" aria-label="Записей на странице">
+      {% for n in per_page_options %}
+      <option value="{{ n }}" {% if per_page == n %}selected{% endif %}>{{ n }}</option>
+      {% endfor %}
+    </select>
+  </label>
 </form>
 
 {% if page.object_list %}
@@ -90,8 +98,8 @@
   </div>
 </form>
 
-{% if page.has_other_pages %}
 <nav class="pagination">
+  {% if page.has_other_pages %}
   {% if page.has_previous %}
   <a href="?page={{ page.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">←</a>
   {% endif %}
@@ -99,8 +107,10 @@
   {% if page.has_next %}
   <a href="?page={{ page.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">→</a>
   {% endif %}
+  {% else %}
+  <span>Всего: {{ page.paginator.count }}</span>
+  {% endif %}
 </nav>
-{% endif %}
 
 {% else %}
 <p class="empty card">Ничего не найдено.</p>

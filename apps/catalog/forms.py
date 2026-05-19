@@ -39,6 +39,7 @@ class CatalogObjectForm(forms.ModelForm):
             'description',
             'comment',
             'placement',
+            'tags',
             'condition',
         ]
         widgets = {
@@ -46,6 +47,12 @@ class CatalogObjectForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 4}),
             'comment': forms.Textarea(attrs={'rows': 3}),
             'placement': forms.Textarea(attrs={'rows': 3}),
+            'tags': forms.TextInput(
+                attrs={
+                    'autocomplete': 'off',
+                    'placeholder': 'Слова через пробел (только для поиска)',
+                }
+            ),
         }
 
     def __init__(self, *args, **kwargs):

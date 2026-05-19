@@ -19,7 +19,7 @@ body {
 }
 
 .print-header {
-  margin-bottom: 6mm;
+  margin-bottom: 5mm;
   border-bottom: 0.4mm solid #ccc;
   padding-bottom: 3mm;
 }
@@ -40,56 +40,49 @@ body {
 }
 
 .print-body {
-  margin: 0 0 4mm;
+  margin: 0 0 3mm;
   white-space: pre-wrap;
 }
 
-.photo-grid-area {
+.print-text {
+  margin-bottom: 4mm;
+}
+
+.photo-area {
+  margin-top: 2mm;
+}
+
+.photo-primary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 4mm;
+}
+
+.photo-primary img {
+  display: block;
+  object-fit: contain;
+  max-width: 170mm;
+  max-height: 105mm;
+}
+
+.photo-extras {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  align-content: center;
   align-items: center;
-  gap: 5mm;
-  min-height: 110mm;
-  margin-top: 4mm;
+  gap: 3mm;
 }
 
-.photo-slot {
+.photo-extra-slot {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.photo-grid-area img {
-  object-fit: contain;
+.photo-extra-slot img {
   display: block;
-}
-
-.photos-1 .photo-slot {
-  width: 100%;
-}
-
-.photos-1 img {
-  max-width: 170mm;
-  max-height: 95mm;
-}
-
-.photos-row .photo-slot {
-  flex: 0 1 auto;
-}
-
-.photos-row img {
-  max-width: 58mm;
-  max-height: 72mm;
-}
-
-.photos-grid .photo-slot {
-  flex: 0 1 calc(50% - 5mm);
-  max-width: calc(50% - 5mm);
-}
-
-.photos-grid img {
-  max-width: 82mm;
-  max-height: 52mm;
+  object-fit: contain;
+  max-width: 42mm;
+  max-height: 32mm;
 }

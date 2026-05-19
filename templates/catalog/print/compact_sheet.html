@@ -1,0 +1,18 @@
+<section class="compact-sheet">
+  {% for item in items %}
+  <article class="compact-row">
+    <div class="compact-fields">
+      <p class="compact-id">{{ item.obj.code }}</p>
+      <p class="compact-line"><span class="compact-label">От</span> {{ item.obj.sender|default:"—" }}</p>
+      <p class="compact-line"><span class="compact-label">Описание</span> {{ item.obj.description|default:"—" }}</p>
+      <p class="compact-line"><span class="compact-label">Комментарий</span> {{ item.obj.comment|default:"—" }}</p>
+      <p class="compact-line"><span class="compact-label">Размещение</span> {{ item.obj.placement|default:"—" }}</p>
+    </div>
+    {% if item.photo_uri %}
+    <div class="compact-photo">
+      <img src="{{ item.photo_uri }}" alt="">
+    </div>
+    {% endif %}
+  </article>
+  {% endfor %}
+</section>

@@ -204,6 +204,24 @@ body.modal-open { overflow: hidden; }
   max-width: 30%;
 }
 
+.filter-per-page {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0;
+}
+
+.filter-per-page .label-text {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.filter-per-page-select {
+  width: 5.5rem;
+  min-width: 5.5rem;
+}
+
 /* —— Forms —— */
 .input,
 select.input,
@@ -419,26 +437,6 @@ textarea.input {
   font-weight: 600;
   text-align: center;
   color: var(--muted);
-}
-
-/* —— Print preview —— */
-.print-meta {
-  margin: -0.5rem 0 0.75rem;
-  font-size: 0.9rem;
-}
-
-.print-preview-frame {
-  padding: 0;
-  overflow: hidden;
-  min-height: calc(100vh - 10rem);
-}
-
-.print-preview-frame iframe {
-  width: 100%;
-  height: calc(100vh - 10rem);
-  min-height: 640px;
-  border: none;
-  display: block;
 }
 
 /* —— Messages —— */
@@ -728,10 +726,6 @@ textarea.input {
   .page-head { flex-direction: column; align-items: flex-start; }
   .detail-list { grid-template-columns: 1fr; }
   .detail-list dt { margin-top: 0.5rem; }
-  .print-preview-frame iframe {
-    min-height: 50vh;
-    height: calc(100vh - 12rem);
-  }
 }
 
 [data-theme="dark"] {

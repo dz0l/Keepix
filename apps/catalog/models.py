@@ -64,6 +64,7 @@ class CatalogObject(models.Model):
     description = models.TextField(blank=True, verbose_name='Описание')
     comment = models.TextField(blank=True, verbose_name='Комментарий')
     placement = models.TextField(blank=True, verbose_name='Размещение')
+    tags = models.TextField(blank=True, verbose_name='Теги')
     condition = models.CharField(
         max_length=24,
         choices=Condition.choices,
@@ -117,6 +118,7 @@ class CatalogObject(models.Model):
             GinIndex(fields=['description'], name='catalog_obj_descr_trgm', opclasses=['gin_trgm_ops']),
             GinIndex(fields=['comment'], name='catalog_obj_comment_trgm', opclasses=['gin_trgm_ops']),
             GinIndex(fields=['placement'], name='catalog_obj_place_trgm', opclasses=['gin_trgm_ops']),
+            GinIndex(fields=['tags'], name='catalog_obj_tags_trgm', opclasses=['gin_trgm_ops']),
         ]
 
     def __str__(self) -> str:
