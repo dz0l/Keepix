@@ -168,15 +168,6 @@ const KeepixCatalog = (function () {
   }
 
   function initFileDropzones() {
-    const objectForm = document.getElementById('object-form');
-    if (objectForm) {
-      objectForm.addEventListener('submit', () => {
-        objectForm.querySelectorAll('input[type="file"]').forEach((input) => {
-          input.value = '';
-        });
-      });
-    }
-
     document.querySelectorAll('[data-dropzone-for]').forEach((zone) => {
       const inputId = zone.getAttribute('data-dropzone-for');
       const input = document.getElementById(inputId);
