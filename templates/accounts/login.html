@@ -2,13 +2,23 @@
 {% load static %}
 {% block title %}Вход — Keepix{% endblock %}
 {% block content %}
-<section class="card narrow">
-  <h1>Вход</h1>
-  <form method="post" class="stack">{% csrf_token %}
-    {{ form.non_field_errors }}
-    <label>{{ form.username.label }}{{ form.username }}</label>
-    <label>{{ form.password.label }}{{ form.password }}</label>
-    <button type="submit" class="primary">Войти</button>
+<section class="card card-narrow">
+  <h1 class="auth-title">Вход</h1>
+  <form method="post" class="auth-form">{% csrf_token %}
+    {% if form.non_field_errors %}
+    <ul class="form-errors">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    {% endif %}
+    <label>
+      <span class="label-text">{{ form.username.label }}</span>
+      {{ form.username }}
+      {% if form.username.errors %}<span class="field-error">{{ form.username.errors.0 }}</span>{% endif %}
+    </label>
+    <label>
+      <span class="label-text">{{ form.password.label }}</span>
+      {{ form.password }}
+      {% if form.password.errors %}<span class="field-error">{{ form.password.errors.0 }}</span>{% endif %}
+    </label>
+    <button type="submit" class="primary auth-submit">Войти</button>
   </form>
 </section>
 {% endblock %}
