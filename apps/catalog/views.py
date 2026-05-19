@@ -122,6 +122,17 @@ def _build_sort_urls(request, sort: str, order: str) -> dict[str, str]:
     return urls
 
 
+def _build_per_page_urls(request) -> dict[int, str]:
+    base = request.GET.copy()
+    base.pop('page', None)
+    urls: dict[int, str] = {}
+    for value in PER_PAGE_OPTIONS:
+        params = base.copy()
+        params['per_page'] = str(value)
+        urls[value] = params.urlencode()
+    return urls
+
+
 def _check_version(obj: CatalogObject, posted: str) -> bool:
     if not posted:
         return True
@@ -210,6 +221,7 @@ def object_list(request):
 
     query_params = request.GET.copy()
     query_params.pop('page', None)
+    per_page_urls = _build_per_page_urls(request)
 
     return render(
         request,
@@ -221,7 +233,10 @@ def object_list(request):
             'sort': sort,
             'order': order,
             'per_page': per_page,
-            'per_page_options': PER_PAGE_OPTIONS,
+            'per_page_links': [
+                {'value': n, 'query': per_page_urls[n], 'active': n == per_page}
+                for n in PER_PAGE_OPTIONS
+            ],
             'sort_urls': _build_sort_urls(request, sort, order),
             'type_choices': CatalogObject.ObjectType.choices,
             'query_string': query_params.urlencode(),

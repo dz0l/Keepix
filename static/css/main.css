@@ -204,24 +204,6 @@ body.modal-open { overflow: hidden; }
   max-width: 30%;
 }
 
-.filter-per-page {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  margin: 0;
-}
-
-.filter-per-page .label-text {
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
-.filter-per-page-select {
-  width: 5.5rem;
-  min-width: 5.5rem;
-}
-
 /* —— Forms —— */
 .input,
 select.input,
@@ -453,13 +435,50 @@ textarea.input {
 .messages li { margin: 0.25rem 0; }
 
 /* —— Pagination —— */
+.list-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+
 .pagination {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 1rem;
-  margin: 1rem 0;
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: 0.95rem;
+}
+
+.per-page-links {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.per-page-links a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.per-page-links a:hover {
+  text-decoration: underline;
+}
+
+.per-page-current {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.per-page-sep {
+  color: var(--muted);
+  margin: 0 0.35rem;
+  user-select: none;
 }
 
 .pagination a {
