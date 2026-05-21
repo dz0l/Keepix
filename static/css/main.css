@@ -728,6 +728,29 @@ textarea.input {
   padding: 0.15rem 0;
 }
 
+.dropzone-file-remove {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: inherit;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-align: left;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropzone-file-remove:hover {
+  color: var(--danger);
+}
+
 /* —— Photo lightbox —— */
 .lightbox {
   align-items: center;

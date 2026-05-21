@@ -140,28 +140,50 @@ const KeepixCatalog = (function () {
     syncOrder();
   }
 
+  const pendingInputFiles = new WeakMap();
+
+  function getPendingFiles(input) {
+    return pendingInputFiles.get(input) || [];
+  }
+
   function setFiles(input, files) {
     const dt = new DataTransfer();
     Array.from(files).forEach((file) => dt.items.add(file));
     input.files = dt.files;
+    pendingInputFiles.set(input, Array.from(files));
   }
 
   function addFiles(input, files) {
-    const merged = [...Array.from(input.files), ...Array.from(files)];
+    const merged = [...getPendingFiles(input), ...Array.from(files)];
     setFiles(input, merged);
+  }
+
+  function removeFileAt(input, index) {
+    const files = getPendingFiles(input).filter((_, i) => i !== index);
+    setFiles(input, files);
   }
 
   function renderDropzoneList(input) {
     const list = document.querySelector(`[data-dropzone-list="${input.id}"]`);
     if (!list) return;
     list.innerHTML = '';
-    if (!input.files.length) {
+    const files = getPendingFiles(input);
+    if (!files.length) {
       list.hidden = true;
       return;
     }
-    Array.from(input.files).forEach((file) => {
+    files.forEach((file, index) => {
       const li = document.createElement('li');
-      li.textContent = file.name;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'dropzone-file-remove';
+      btn.textContent = file.name;
+      btn.title = 'Убрать из вложений';
+      btn.addEventListener('click', () => {
+        removeFileAt(input, index);
+        renderDropzoneList(input);
+      });
+      li.appendChild(btn);
       list.appendChild(li);
     });
     list.hidden = false;
@@ -172,6 +194,8 @@ const KeepixCatalog = (function () {
       const inputId = zone.getAttribute('data-dropzone-for');
       const input = document.getElementById(inputId);
       if (!input) return;
+
+      pendingInputFiles.set(input, []);
 
       input.classList.add('drop-input-hidden');
 
@@ -197,7 +221,10 @@ const KeepixCatalog = (function () {
       });
 
       input.addEventListener('change', () => {
-        setFiles(input, input.files);
+        const picked = Array.from(input.files);
+        if (!picked.length) return;
+        addFiles(input, picked);
+        input.value = '';
         renderDropzoneList(input);
       });
 
