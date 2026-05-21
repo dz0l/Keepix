@@ -736,7 +736,7 @@ textarea.input {
   background: none;
   font: inherit;
   font-size: inherit;
-  color: var(--accent);
+  color: #c0392b;
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -748,7 +748,15 @@ textarea.input {
 }
 
 .dropzone-file-remove:hover {
-  color: var(--danger);
+  color: var(--danger-hover);
+}
+
+[data-theme="dark"] .dropzone-file-remove {
+  color: #f97066;
+}
+
+[data-theme="dark"] .dropzone-file-remove:hover {
+  color: #fda29b;
 }
 
 /* —— Photo lightbox —— */

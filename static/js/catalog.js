@@ -163,6 +163,12 @@ const KeepixCatalog = (function () {
     setFiles(input, files);
   }
 
+  function syncInputFilesFromPending(input) {
+    const pending = getPendingFiles(input);
+    if (!pending.length) return;
+    setFiles(input, pending);
+  }
+
   function renderDropzoneList(input) {
     const list = document.querySelector(`[data-dropzone-list="${input.id}"]`);
     if (!list) return;
@@ -190,6 +196,15 @@ const KeepixCatalog = (function () {
   }
 
   function initFileDropzones() {
+    const objectForm = document.getElementById('object-form');
+    if (objectForm) {
+      objectForm.addEventListener('submit', () => {
+        objectForm.querySelectorAll('input[type="file"]').forEach((input) => {
+          syncInputFilesFromPending(input);
+        });
+      });
+    }
+
     document.querySelectorAll('[data-dropzone-for]').forEach((zone) => {
       const inputId = zone.getAttribute('data-dropzone-for');
       const input = document.getElementById(inputId);
@@ -225,6 +240,7 @@ const KeepixCatalog = (function () {
         if (!picked.length) return;
         addFiles(input, picked);
         input.value = '';
+        syncInputFilesFromPending(input);
         renderDropzoneList(input);
       });
 
