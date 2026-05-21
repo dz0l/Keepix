@@ -88,6 +88,8 @@ docker compose exec -it app python manage.py ...
 | Command | Description |
 |---------|-------------|
 | `create_staff_user <username> --role admin\|user` | Creates a user (hidden password on TTY, or `KEEPIX_NEW_USER_PASSWORD` for non‑TTY flows). `--email` optional. |
+| `deactivate_staff_user <username>` | Disables login (`is_active=False`); account remains in the database. |
+| `delete_staff_user <username>` | Permanently deletes the user. Interactive confirm on TTY, or pass `--yes` / `-y`. |
 | `list_deleted` | Prints deleted catalogue records to stdout (not exposed in UI). |
 | `scan` | Prints CPU/memory/disk overview for operators via SSH. |
 | `backup_db_auto` | Gzipped `pg_dump` into `BACKUP_DB_ROOT`; keeps the newest `BACKUP_DB_KEEP_LAST` files. |

@@ -99,6 +99,16 @@ def _object_access_queryset(user):
     return qs
 
 
+def _placement_search_filter(query: str) -> Q:
+    words = [part for part in re.split(r'\s+', query.strip()) if part]
+    if not words:
+        return Q(pk__in=[])
+    placement_q = Q()
+    for word in words:
+        placement_q &= Q(placement__icontains=word)
+    return placement_q
+
+
 def _apply_search(qs, query: str):
     query = query.strip()
     if not query:
@@ -108,7 +118,7 @@ def _apply_search(qs, query: str):
         Q(sender__icontains=query)
         | Q(description__icontains=query)
         | Q(comment__icontains=query)
-        | Q(placement__icontains=query)
+        | _placement_search_filter(query)
         | Q(tags__icontains=query)
         | Q(obj_type__icontains=query)
     )
