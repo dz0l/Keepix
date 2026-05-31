@@ -1,11 +1,24 @@
+/* PDF: массовая печать, до 3 объектов на лист (A4 альбом).
+   Подключается в apps/catalog/printing.py → render_compact_pdf().
+   Шаблон: templates/catalog/print/compact_sheet.html */
+
+/* Ручная настройка размеров (pt) */
+:root {
+  --compact-text-base: 9pt; /* базовый текст */
+  --compact-description-size: 12pt; /* строка «Описание» */
+}
+
 @page {
   size: A4 landscape;
   margin: 10mm 12mm;
 }
 
+/* Базовый размер (--compact-text-base):
+   — «От …», «Комментарий …», «Размещение …» (.compact-line);
+   — подписи в строках (.compact-label). */
 body {
   font-family: 'DejaVu Sans', sans-serif;
-  font-size: 9pt;
+  font-size: var(--compact-text-base);
   color: #111;
   margin: 0;
 }
@@ -42,6 +55,7 @@ body {
   overflow: hidden;
 }
 
+/* Код объекта в блоке строки — отдельный размер */
 .compact-id {
   margin: 0 0 1.5mm;
   font-size: 13pt;
@@ -49,12 +63,19 @@ body {
   letter-spacing: 0.04em;
 }
 
+/* Строки «От …», «Комментарий …», «Размещение …» — базовый размер */
 .compact-line {
   margin: 0 0 1.2mm;
   white-space: pre-wrap;
   line-height: 1.25;
 }
 
+/* Строка «Описание …» — размер независимо (.compact-line-description в compact_sheet.html) */
+.compact-line-description {
+  font-size: var(--compact-description-size);
+}
+
+/* Подпись в начале строки («От», «Описание» …) — 9pt от body, только жирнее */
 .compact-label {
   font-weight: 700;
   color: #333;
@@ -67,6 +88,7 @@ body {
   align-items: center;
 }
 
+/* Превью фото справа — только размеры картинки */
 .compact-photo img {
   display: block;
   object-fit: contain;

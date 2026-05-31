@@ -1,11 +1,24 @@
+/* PDF: карточка одного объекта (A4 портрет).
+   Подключается в apps/catalog/printing.py → render_cards_pdf().
+   Шаблон: templates/catalog/print/card_page.html */
+
+/* Ручная настройка размеров (pt) */
+:root {
+  --print-text-base: 11pt; /* базовый текст */
+  --print-description-size: 14pt; /* строка «Описание» */
+}
+
 @page {
   size: A4 portrait;
   margin: 14mm 16mm;
 }
 
+/* Базовый размер (--print-text-base):
+   — «От», подписи «Комментарий», «Размещение»;
+   — текст комментария и размещения (.print-body). */
 body {
   font-family: 'DejaVu Sans', sans-serif;
-  font-size: 11pt;
+  font-size: var(--print-text-base);
   color: #111;
   margin: 0;
 }
@@ -24,24 +37,33 @@ body {
   padding-bottom: 3mm;
 }
 
+/* Код объекта (0001) — отдельный крупный размер */
 .print-id {
   margin: 0 0 2mm;
   font-size: 20pt;
   letter-spacing: 0.05em;
 }
 
+/* Подписи полей: «От», «Описание», «Комментарий», «Размещение» — размер от body (11pt), только жирнее */
 .print-label {
   font-weight: 700;
   color: #333;
 }
 
+/* Строка «От …» и строка с подписью перед блоком текста */
 .print-field {
   margin: 0 0 2mm;
 }
 
+/* Многострочный текст: комментарий, размещение — базовый размер */
 .print-body {
   margin: 0 0 3mm;
   white-space: pre-wrap;
+}
+
+/* Только текст графы «Описание» — размер независимо от остальных (.print-body-description в card_page.html) */
+.print-body-description {
+  font-size: var(--print-description-size);
 }
 
 .print-text {
@@ -59,6 +81,7 @@ body {
   margin-bottom: 4mm;
 }
 
+/* Главное фото */
 .photo-primary img {
   display: block;
   object-fit: contain;
@@ -80,6 +103,7 @@ body {
   align-items: center;
 }
 
+/* Дополнительные фото */
 .photo-extra-slot img {
   display: block;
   object-fit: contain;
